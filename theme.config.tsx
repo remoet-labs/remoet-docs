@@ -1,18 +1,17 @@
-import React from 'react'
-import { DocsThemeConfig } from 'nextra-theme-docs'
+import { DocsThemeConfig } from "nextra-theme-docs";
 
 const config: DocsThemeConfig = {
-  logo: <span>My Project</span>,
+  logo: <span>remoet.dev</span>,
   project: {
-    link: 'https://github.com/shuding/nextra-docs-template',
+    link: "https://github.com/remoet-labs/remoet-docs",
   },
   chat: {
-    link: 'https://discord.com',
+    link: "https://discord.gg/yxJA6cBs8U",
   },
-  docsRepositoryBase: 'https://github.com/shuding/nextra-docs-template',
+  docsRepositoryBase: "https://github.com/remoet-labs/remoet-docs",
   footer: {
-    text: 'Nextra Docs Template',
+    text: "remoet.dev © 2024",
   },
-}
+};
 
-export default config
+export default config;
