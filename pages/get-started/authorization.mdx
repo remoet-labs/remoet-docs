@@ -1,0 +1,21 @@
+import Link from 'next/link'
+
+# Authorization
+
+We already described how to generate your API key in the <Link href="/get-started">getting started</Link> chapter.
+
+After you've done that, you are ready to authenticate your requests made to the API.
+
+## Request authorization
+
+We have adopted for the traditional `Bearer <key>` scheme for authenticating your requests.
+
+In your `Headers` simply add:
+
+```
+{
+  "authorization": "Bearer a465dfec-473c-4f41-acd9-b835f9098adc"
+}
+```
+
+And you should be good to go 🙌

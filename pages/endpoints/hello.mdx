@@ -1,1 +1,29 @@
-# Endpoint: `/developers/hello`
+# `GET: hello`
+
+The `/developers/hello` endpoint is a testing endpoint for veryfying that your authentication is setup correctly. 
+One might argue that any of the authenticated endpoints would suffice, but alas, this one exists as well. 
+
+- type: `REST`
+- method: `GET`
+- url: https://api.remoet.dev/developers/hello
+- returns: `string`
+
+cURL
+```cURL
+curl --location 'https://api.remoet.dev/developers/hello' --header 'Authorization: Bearer <your-key>'
+```
+
+Result
+```
+Hello from the public API! <your-email>
+```
+
+Not authenticated response
+```json
+{
+    "statusCode": 401,
+    "message": "Invalid API Key",
+    "error": "Unauthorized"
+}
+```
+
