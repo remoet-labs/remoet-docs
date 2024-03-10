@@ -1,31 +1,23 @@
 # Get Started
 
-```js filename="demo.js" {3} copy
-let a = 1;
+## Create a developer profile
 
-console.log(a);
-```
+The first thing you need to do is create a developer profile at [remoet.dev](https://remoet.dev).
+You will need a Github account to sign up.
 
-## Component
+## Generate your API Key
 
-import { useState } from 'react'
+When you have created your developer profile, nagivate to your API keys at [remoet.dev/profile/api](https://remoet.dev/profile/api)
+There you can generate up to 5 API Keys. 
 
-{/* Import CSS modules */}
-import styles from '../components/counters.module.css'
+Each Key allows you to make 1000 requests a month.
 
-export const Counter = () => {
-  const [count, setCount] = useState(0);
-  return (
-    <div>
-      <button onClick={() => setCount(count + 1)} className={styles.counter}>Clicked {count} times</button>
-    </div>
-  );
-};
+## Use your key
 
-<Counter/>
+When you have generated a key you are ready to use it on one of our endpoints.
 
-## External Component
+import Link from 'next/link'
 
-import Counters from '../components/counters'
-
-<Counters />
+## Endpoints
+- <Link href="/endpoints/hello">`developers/hello`</Link>
+- <Link href="/endpoints/get-me">`developers/get-me`</Link>
