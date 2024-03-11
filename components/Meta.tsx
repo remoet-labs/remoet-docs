@@ -11,7 +11,7 @@ const Meta = () => {
         alt="og image"
         width="2400"
         height="1200"
-        title="Fully remote companies hiring engineers in 2024 - remoet.dev"
+        title="remoet.dev API documentation"
       />
     </>
   );
