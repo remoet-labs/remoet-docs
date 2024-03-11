@@ -13,7 +13,7 @@ If you find something wrong in the docs or want to submit changes to the API ple
 
 First, run `yarn` to install the dependencies.
 
-Then, run `yarn dev` to start the development server and visit localhost:3000.
+Then, run `yarn dev` to start the development server and visit localhost:4000.
 
 ## License
 

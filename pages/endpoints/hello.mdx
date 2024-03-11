@@ -1,24 +1,48 @@
-# `GET: hello`
+# `GET/user/hello`
 
-The `/developers/hello` endpoint is a testing endpoint for veryfying that your authentication is setup correctly. 
+The `/user/hello` endpoint is a testing endpoint for veryfying that your authentication is setup correctly. 
 One might argue that any of the authenticated endpoints would suffice, but alas, this one exists as well. 
 
+## Basic
 - type: `REST`
 - method: `GET`
-- url: https://api.remoet.dev/developers/hello
+- url: https://api.remoet.dev/user/hello
 - returns: `string`
 
-cURL
+## cURL
 ```cURL
-curl --location 'https://api.remoet.dev/developers/hello' --header 'Authorization: Bearer <your-key>'
+curl --location 'https://api.remoet.dev/user/hello' --header 'Authorization: Bearer <Your key>'
 ```
 
-Result
-```
-Hello from the public API! <your-email>
+## HTTP
+```http
+GET /user/hello HTTP/1.1
+Host: https://api.remoet.dev
+Authorization: Bearer <Your key>
 ```
 
-Not authenticated response
+## Javacript Fetch
+```javascript
+const myHeaders = new Headers();
+myHeaders.append("Authorization", `Bearer ${key}`);
+
+const requestOptions = {
+  method: "GET",
+  headers: myHeaders
+};
+
+fetch("https://api.remoet.dev/user/hello", requestOptions)
+  .then((response) => response.text())
+  .then((result) => console.log(result))
+  .catch((error) => console.error(error));
+```
+
+## Result
+```
+Hello from the public API! <Your email>
+```
+
+## Non authenticated response
 ```json
 {
     "statusCode": 401,

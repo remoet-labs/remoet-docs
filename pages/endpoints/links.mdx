@@ -1,0 +1,80 @@
+# `GET/user/links`
+
+This endpoints returns all the link values you have entered or not entered into your profile.
+
+## Basic
+- type: `REST`
+- method: `GET`
+- url: https://api.remoet.dev/user/links
+- returns: `JSON`
+
+## cURL
+```curl
+curl --location 'https://api.remoet.dev/user/links' --header 'Authorization: Bearer <Your key>'
+```
+
+## HTTP
+```http
+GET /user/links HTTP/1.1
+Host: https://api.remoet.dev
+Authorization: Bearer <Your key>
+```
+
+## Javascript Fetch
+```javascript
+const myHeaders = new Headers();
+myHeaders.append("Authorization", `Bearer ${key}`);
+
+const requestOptions = {
+  method: "GET",
+  headers: myHeaders
+};
+
+fetch("https://api.remoet.dev/user/links", requestOptions)
+  .then((response) => response.text())
+  .then((result) => console.log(result))
+  .catch((error) => console.error(error));
+```
+
+## Result
+### Note about data fields
+Currently links and other data are stored together with an `isPublic` flag. This is a feature not yet implemented, 
+but it might be implemented in the future to gain access to very fine grain privacy settings.
+
+```json
+{
+    "url": {
+        "isPublic": <boolean>,
+        "value": <string | null>
+    },
+    "githubUrl": {
+        "isPublic": <boolean>,
+        "value": <string | null>
+    },
+    "facebookUrl": {
+        "isPublic": <boolean>,
+        "value": <string | null>
+    },
+    "twitterUrl": {
+        "isPublic": <boolean>,
+        "value": <string | null>
+    },
+    "linkedinUrl": {
+        "isPublic": <boolean>,
+        "value": <string | null>
+    },
+    "youtubeUrl": {
+        "isPublic": <boolean>,
+        "value": <string | null>
+    }
+}
+```
+
+## Non authenticated response
+```json
+{
+    "statusCode": 401,
+    "message": "Invalid API Key",
+    "error": "Unauthorized"
+}
+```
