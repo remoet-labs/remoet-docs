@@ -10,18 +10,18 @@ One might argue that any of the authenticated endpoints would suffice, but alas,
 ## Basic
 - type: `REST`
 - method: `GET`
-- url: https://api.remoet.dev/user/hello
+- url: https://www.api.remoet.dev/user/hello
 - returns: `string`
 
 ## cURL
 ```cURL
-curl --location 'https://api.remoet.dev/user/hello' --header 'Authorization: Bearer <Your key>'
+curl --location 'https://www.api.remoet.dev/user/hello' --header 'Authorization: Bearer <Your key>'
 ```
 
 ## HTTP
 ```http
 GET /user/hello HTTP/1.1
-Host: https://api.remoet.dev
+Host: https://www.api.remoet.dev
 Authorization: Bearer <Your key>
 ```
 
@@ -35,7 +35,7 @@ const requestOptions = {
   headers: myHeaders
 };
 
-fetch("https://api.remoet.dev/user/hello", requestOptions)
+fetch("https://www.api.remoet.dev/user/hello", requestOptions)
   .then((response) => response.text())
   .then((result) => console.log(result))
   .catch((error) => console.error(error));
