@@ -1,4 +1,5 @@
 {
-    "hello": "GET: hello",
-    "get-me": "GET: get-me"
+    "hello": "GET/user/hello",
+    "full": "GET/user/full",
+    "links": "GET/user/links"
 }
