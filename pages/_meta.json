@@ -5,9 +5,7 @@
     "title": "About",
     "type": "page"
   },
-  "endpoints": {
-    "title": "Endpoints"
-  },
+  "endpoints": "Endpoints",
   "contact": {
     "title": "Contact ↗",
     "type": "page",
