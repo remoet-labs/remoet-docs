@@ -5,7 +5,11 @@
     "title": "About",
     "type": "page"
   },
-  "endpoints": "Endpoints",
+  "hello": "GET/user/hello",
+  "full": "GET/user/full",
+  "links": "GET/user/links",
+  "jobs": "GET/user/jobs",
+  "projects": "GET/user/projects",
   "contact": {
     "title": "Contact ↗",
     "type": "page",
