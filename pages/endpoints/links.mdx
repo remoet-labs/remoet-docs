@@ -6,14 +6,14 @@ import Meta from '../../components/Meta'
 
 This endpoints returns all the link values you have entered or not entered into your profile.
 
-## Basic
+## Basic Information
 - type: `REST`
 - method: `GET`
 - url: https://www.api.remoet.dev/user/links
 - returns: `JSON`
 
 ## cURL
-```curl
+```bash
 curl --location 'https://www.api.remoet.dev/user/links' --header 'Authorization: Bearer <Your key>'
 ```
 
@@ -40,7 +40,7 @@ fetch("https://www.api.remoet.dev/user/links", requestOptions)
   .catch((error) => console.error(error));
 ```
 
-## Result
+## Response
 ### Note about data fields
 Currently links and other data are stored together with an `isPublic` flag. This is a feature not yet implemented, 
 but it might be implemented in the future to gain access to very fine grain privacy settings.

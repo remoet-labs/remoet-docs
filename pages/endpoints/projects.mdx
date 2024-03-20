@@ -1,0 +1,92 @@
+import Meta from '../../components/Meta'
+
+<Meta />
+
+# `GET/user/projects`
+
+This endpoint returns all the projects that the user has created.
+
+## Basic Information
+- type: `REST`
+- method: `GET`
+- url: https://www.api.remoet.dev/user/projects
+- returns: `JSON`
+
+## cURL
+```bash
+curl --location 'https://www.api.remoet.dev/user/projects' --header 'Authorization: Bearer <Your key>'
+```
+
+## HTTP
+```http
+GET /user/projects HTTP/1.1
+Host: www.api.remoet.dev
+Authorization: Bearer <Your key>
+```
+
+## Javascript Fetch
+```javascript
+const myHeaders = new Headers();
+myHeaders.append("Authorization", `Bearer ${key}`);
+
+const requestOptions = {
+  method: "GET",
+  headers: myHeaders,
+};
+
+fetch("https://www.api.remoet.dev/user/projects", requestOptions)
+  .then((response) => response.text())
+  .then((result) => console.log(result))
+  .catch((error) => console.error(error));
+```
+
+## DTO
+```typescript
+export class PublicUserProjectDto {
+  title: string;
+  shortDescription: string;
+  technologies: string[];
+  isCurrent: boolean;
+  isRemote: boolean;
+  isOpenSource: boolean;
+
+  // Nullable fields
+  description: string | null;
+  role: string | null;
+  startDate: Date | null;
+  endDate: Date | null;
+  repoUrl: string | null;
+  demoUrl: string | null;
+  jobId: string | null;
+}
+```
+
+## Response
+```json
+[
+    {
+        "title": <string>,
+        "shortDescription": <string>,
+        "technologies": [<string>],
+        "isCurrent": <boolean>,
+        "isRemote": <boolean>,
+        "isOpenSource": <boolean>,
+        "description": <string | null>,
+        "role": <string | null>,
+        "startDate": <Date>,
+        "endDate": <Date>,
+        "repoUrl": <string | null>,
+        "demoUrl": <string | null>,
+        "jobId": <string | null>
+    }
+]
+```
+
+## Non authenticated response
+```json
+{
+    "statusCode": 401,
+    "message": "Invalid API Key",
+    "error": "Unauthorized"
+}
+```
