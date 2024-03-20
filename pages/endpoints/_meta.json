@@ -2,5 +2,6 @@
     "hello": "GET/user/hello",
     "full": "GET/user/full",
     "links": "GET/user/links",
+    "jobs": "GET/user/jobs",
     "projects": "GET/user/projects"
 }
