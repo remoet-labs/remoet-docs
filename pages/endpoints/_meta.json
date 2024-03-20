@@ -1,5 +1,6 @@
 {
     "hello": "GET/user/hello",
     "full": "GET/user/full",
-    "links": "GET/user/links"
+    "links": "GET/user/links",
+    "projects": "GET/user/projects"
 }
