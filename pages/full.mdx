@@ -21,11 +21,11 @@ curl --location 'https://www.api.remoet.dev/user/full' --header 'Authorization: 
 ## HTTP
 ```http
 GET /user/full HTTP/1.1
-Host: https://www.api.remoet.dev
+Host: www.api.remoet.dev
 Authorization: Bearer <Your key>
 ```
 
-## Javacript Fetch
+## JavaScript Fetch
 ```javascript
 const myHeaders = new Headers();
 myHeaders.append("Authorization", `Bearer ${key}`);
@@ -53,6 +53,10 @@ fetch("https://www.api.remoet.dev/user/full", requestOptions)
         "isPublic": <Boolean>,
         "slug": <string | null>,
         "name": {
+            "isPublic": <boolean>,
+            "value": <string | null>
+        },
+        "avatarUrl": {
             "isPublic": <boolean>,
             "value": <string | null>
         },
@@ -111,6 +115,52 @@ fetch("https://www.api.remoet.dev/user/full", requestOptions)
             "description": <string | null>,
             "isRemote": <boolean>,
             "companyUrl": <string>,
+        }
+    ],
+    "projects": <array> [
+        {
+            "title": <string>,
+            "shortDescription": <string>,
+            "technologies": <array> [<string>],
+            "isCurrent": <boolean>,
+            "isRemote": <boolean>,
+            "isOpenSource": <boolean>,
+            "description": <string | null>,
+            "role": <string | null>,
+            "startDate": <timestamp | null>,
+            "endDate": <timestamp | null>,
+            "repoUrl": <string | null>,
+            "demoUrl": <string | null>,
+            "jobId": <string | null>
+        }
+    ],
+    "linkTrees": <array> [
+        {
+            "id": <string>,
+            "title": <string>,
+            "description": <string | null>,
+            "slug": <string>,
+            "links": <array> [
+                {
+                    "id": <string>,
+                    "label": <string>,
+                    "url": <string>
+                }
+            ],
+            "createdAt": <timestamp>,
+            "updatedAt": <timestamp>
+        }
+    ],
+    "education": <array> [
+        {
+            "institution": <string>,
+            "institutionUrl": <string | null>,
+            "studyLevel": <string | null>,
+            "fieldOfStudy": <string | null>,
+            "startDate": <timestamp | null>,
+            "endDate": <timestamp | null>,
+            "isCurrent": <boolean>,
+            "description": <string | null>
         }
     ]
 }

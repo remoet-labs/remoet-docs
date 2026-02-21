@@ -1,0 +1,163 @@
+import Meta from "../components/Meta";
+
+<Meta />
+
+# `GET/user/linktrees`
+
+This endpoint returns all the link trees you have created.
+
+## Basic Information
+
+- type: `REST`
+- method: `GET`
+- url: https://www.api.remoet.dev/user/linktrees
+- returns: `JSON`
+
+## cURL
+
+```bash
+curl --location 'https://www.api.remoet.dev/user/linktrees' --header 'Authorization: Bearer <Your key>'
+```
+
+## HTTP
+
+```http
+GET /user/linktrees HTTP/1.1
+Host: www.api.remoet.dev
+Authorization: Bearer <Your key>
+```
+
+## JavaScript Fetch
+
+```javascript
+const myHeaders = new Headers();
+myHeaders.append("Authorization", `Bearer ${key}`);
+
+const requestOptions = {
+  method: "GET",
+  headers: myHeaders,
+};
+
+fetch("https://www.api.remoet.dev/user/linktrees", requestOptions)
+  .then((response) => response.text())
+  .then((result) => console.log(result))
+  .catch((error) => console.error(error));
+```
+
+## Response
+
+```json
+[
+  {
+    "id": "string",
+    "title": "string",
+    "description": "string | null",
+    "slug": "string",
+    "views": "number",
+    "links": [
+      {
+        "id": "string",
+        "label": "string",
+        "url": "string",
+        "clicks": "number"
+      }
+    ],
+    "createdAt": "Date",
+    "updatedAt": "Date"
+  }
+]
+```
+
+## Non authenticated response
+
+```json
+{
+  "statusCode": 401,
+  "message": "Invalid API Key",
+  "error": "Unauthorized"
+}
+```
+
+# `GET/user/linktrees/:slug`
+
+This endpoint returns a specific link tree by its slug.
+
+## Basic Information
+
+- type: `REST`
+- method: `GET`
+- url: https://www.api.remoet.dev/user/linktrees/:slug
+- returns: `JSON`
+
+## cURL
+
+```bash
+curl --location 'https://www.api.remoet.dev/user/linktrees/my-link-tree' --header 'Authorization: Bearer <Your key>'
+```
+
+## HTTP
+
+```http
+GET /user/linktrees/my-link-tree HTTP/1.1
+Host: www.api.remoet.dev
+Authorization: Bearer <Your key>
+```
+
+## JavaScript Fetch
+
+```javascript
+const myHeaders = new Headers();
+myHeaders.append("Authorization", `Bearer ${key}`);
+
+const requestOptions = {
+  method: "GET",
+  headers: myHeaders,
+};
+
+fetch("https://www.api.remoet.dev/user/linktrees/my-link-tree", requestOptions)
+  .then((response) => response.text())
+  .then((result) => console.log(result))
+  .catch((error) => console.error(error));
+```
+
+## Response
+
+```json
+{
+  "id": "string",
+  "title": "string",
+  "description": "string | null",
+  "slug": "string",
+  "views": "number",
+  "links": [
+    {
+      "id": "string",
+      "label": "string",
+      "url": "string",
+      "clicks": "number"
+    }
+  ],
+  "createdAt": "Date",
+  "updatedAt": "Date"
+}
+```
+
+## Non authenticated response
+
+```json
+{
+  "statusCode": 401,
+  "message": "Invalid API Key",
+  "error": "Unauthorized"
+}
+```
+
+## Not found response
+
+```json
+{
+  "statusCode": 404,
+  "message": "Link tree not found",
+  "error": "Not Found"
+}
+```

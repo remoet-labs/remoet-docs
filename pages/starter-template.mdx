@@ -1,0 +1,83 @@
+import Meta from '../components/Meta'
+
+<Meta />
+
+# Starter Template
+
+The remoet.dev portfolio starter template is a minimal, static portfolio site built with Next.js, Tailwind CSS, and TypeScript.
+It fetches your data from the remoet.dev API at build time, so your API key is never exposed to the client.
+
+## Features
+
+- Server-side data fetching
+- Light and dark mode toggle
+- Responsive single-page layout
+- Sections: Hero, Experience, Projects, Education
+- Clean design with Geist fonts
+- Built with Tailwind CSS
+
+## Quick Start
+
+### 1. Clone the template
+
+```bash
+git clone <repo-url>
+cd starter-template
+yarn install
+```
+
+### 2. Add your API key
+
+Create a `.env.local` file:
+
+```
+REMOET_API_KEY=your_api_key_here
+```
+
+You can generate an API key at [remoet.dev/profile/api](https://remoet.dev/profile/api).
+
+### 3. Run locally
+
+```bash
+yarn dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to see your portfolio.
+
+### 4. Deploy
+
+Deploy to [Vercel](https://vercel.com) and add `REMOET_API_KEY` as an environment variable in your project settings.
+
+## What data is displayed?
+
+The template uses the `GET /user/full` endpoint which returns:
+
+- **Profile** — name, avatar, summary, location, social links
+- **Experience** — work history with company, role, technologies, dates
+- **Projects** — project cards with description, tech stack, repo/demo links
+- **Education** — institution, degree, field of study, dates
+
+## Customization
+
+### Colors
+
+Edit the CSS variables in `app/globals.css` to change the color scheme for both light and dark modes.
+
+### Layout
+
+Modify section order or add/remove sections in `app/page.tsx`.
+
+### Components
+
+All components are in `app/components/`. Reusable UI primitives (badges, tags, date formatting) are in `app/components/ui/`.
+
+## API Endpoint
+
+The template calls a single endpoint:
+
+```
+GET https://www.api.remoet.dev/user/full
+Authorization: Bearer <your-api-key>
+```
+
+Data is revalidated every hour (`revalidate: 3600`). You can adjust this in `lib/api.ts`.

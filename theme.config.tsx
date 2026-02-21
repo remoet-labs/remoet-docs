@@ -10,7 +10,7 @@ const config: DocsThemeConfig = {
   },
   docsRepositoryBase: "https://github.com/remoet-labs/remoet-docs",
   footer: {
-    text: "remoet.dev © 2024",
+    text: "remoet.dev © 2026",
   },
 };
 

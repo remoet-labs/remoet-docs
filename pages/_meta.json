@@ -1,6 +1,7 @@
 {
   "index": "Introduction",
   "get-started": "Get Started",
+  "starter-template": "Starter Template",
   "about": {
     "title": "About",
     "type": "page"
@@ -10,6 +11,8 @@
   "links": "GET/user/links",
   "jobs": "GET/user/jobs",
   "projects": "GET/user/projects",
+  "education": "GET/user/education",
+  "linktrees": "GET/user/linktrees",
   "contact": {
     "title": "Contact ↗",
     "type": "page",
