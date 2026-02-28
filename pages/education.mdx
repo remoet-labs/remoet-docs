@@ -2,9 +2,33 @@ import Meta from '../components/Meta'
 
 <Meta />
 
-# `GET/user/education`
+# `GET /user/education`
 
-This endpoint returns all the education entries the user has created.
+Returns all education entries from your profile, sorted by current status first, then by start date descending.
+
+## How it works
+
+Education entries let you document your academic background — degrees, bootcamps, online programs, or any other institution. Each entry has:
+
+- **institution** — the name of the school, university, or program
+- **institutionUrl** — optional link to the institution's website
+- **studyLevel** — the type of degree or program (see values below)
+- **fieldOfStudy** — e.g. "Computer Science", "Design"
+- **startDate / endDate** — the date range of the program
+- **isCurrent** — set to `true` if you're currently enrolled (omits `endDate`)
+- **description** — optional notes, achievements, thesis topic, etc.
+
+### Study Level Values
+
+| Value | Display Label |
+|---|---|
+| `HIGH_SCHOOL` | High School |
+| `ASSOCIATE` | Associate Degree |
+| `BACHELOR` | Bachelor's Degree |
+| `MASTER` | Master's Degree |
+| `DOCTORATE` | Doctorate |
+| `BOOTCAMP` | Bootcamp |
+| `OTHER` | Other |
 
 ## Basic Information
 - type: `REST`
@@ -53,15 +77,6 @@ class PublicUserEducationDto {
   description: string | null;
 }
 ```
-
-### Study Level Values
-- `HIGH_SCHOOL`
-- `ASSOCIATE`
-- `BACHELOR`
-- `MASTER`
-- `DOCTORATE`
-- `BOOTCAMP`
-- `OTHER`
 
 ## Response
 ```json
