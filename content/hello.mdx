@@ -1,3 +1,10 @@
+---
+title: GET /user/hello
+description: Health-check endpoint that returns a plain-text greeting if your API key is valid. Use it to verify auth setup before hitting heavier routes.
+---
+
+import Link from 'next/link'
+
 # `GET /user/hello`
 
 A health-check endpoint for verifying that your API key works. Returns a plain-text greeting with your account's email if the key is valid.
@@ -48,3 +55,10 @@ Hello from the public API! <Your email>
     "error": "Unauthorized"
 }
 ```
+
+The exact body depends on whether the header is missing, the key is unknown, or the key has expired — see [Errors](/errors).
+
+## See also
+
+- <Link href="/get-started/authorization">Authorization</Link> — bearer header shape and rate-limit notes
+- [Errors](/errors) — full error catalog

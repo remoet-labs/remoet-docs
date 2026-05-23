@@ -1,6 +1,13 @@
+---
+title: GET /user/education
+description: Returns the education entries on your remoet.dev profile — degrees, bootcamps, online programs. Sorted by current first then by start-date descending.
+---
+
+import Link from 'next/link'
+
 # `GET /user/education`
 
-Returns all education entries from your profile, sorted by current status first, then by start date descending.
+Returns all education entries from your profile, sorted with current first, then by start date descending.
 
 ## How it works
 
@@ -98,3 +105,9 @@ class PublicUserEducationDto {
     "error": "Unauthorized"
 }
 ```
+
+## See also
+
+- <Link href="/full">`/user/full`</Link> — same education plus the rest of your profile
+- <Link href="/get-started/authorization">Authorization</Link>
+- [Errors](/errors)

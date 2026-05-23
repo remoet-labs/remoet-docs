@@ -3,6 +3,7 @@ export default {
   'get-started': 'Get Started',
   mcp: 'MCP server',
   tiers: 'Tiers',
+  errors: 'Errors',
   'starter-template': 'Starter Template',
   about: {
     title: 'About',
@@ -19,8 +20,8 @@ export default {
   projects: 'GET /user/projects',
   education: 'GET /user/education',
   linktrees: 'GET /user/linktrees',
-  contact: {
-    title: 'Contact ↗',
-    href: 'https://twitter.com/remoet_dev',
+  discord: {
+    title: 'Discord ↗',
+    href: 'https://discord.gg/yxJA6cBs8U',
   },
 }

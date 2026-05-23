@@ -1,3 +1,8 @@
+---
+title: MCP server
+description: Connect AI agents to remoet.dev via the Model Context Protocol. Endpoint, OAuth + API key auth, tool catalog, per-client setup, session lifecycle, and quotas.
+---
+
 import Link from 'next/link'
 
 # MCP server
@@ -6,56 +11,100 @@ The remoet.dev MCP server lets your AI agent read and write your remoet.dev data
 
 Free tier eligible. You only need a remoet.dev account and one API key.
 
-## Endpoint
+## Endpoints
 
-```
-https://api.remoet.dev/mcp
-```
+The server is split into two routes that take the same set of tools but speak different auth handshakes:
 
-The server uses the official [Streamable HTTP transport](https://modelcontextprotocol.io/specification/2025-03-26/basic/transports) (`POST`, `GET`, `DELETE` against `/mcp`).
+| Route | Auth | Use it from |
+|---|---|---|
+| `https://api.remoet.dev/mcp` | `Authorization: Bearer <key>` (or `x-api-key: <key>`) | Claude Code, Cursor, Windsurf, VS Code agents, custom HTTP clients |
+| `https://api.remoet.dev/mcp/oauth` | OAuth 2.1 with PKCE | Claude Web / Desktop custom connectors |
+
+Both routes implement the official [Streamable HTTP transport](https://modelcontextprotocol.io/specification/2025-03-26/basic/transports) (`POST`, `GET`, `DELETE`). The split exists so the API-key clients don't accidentally trigger the OAuth discovery flow; pick the one that matches your client.
 
 ## Authentication
 
-Two options:
-
 ### A. API key header (most clients)
 
-Pass your key on the `Authorization: Bearer <key>` header. Generate keys at [www.remoet.dev/api-keys](https://www.remoet.dev/api-keys). Same key works for both MCP and the REST API.
+Generate keys at [www.remoet.dev/api-keys](https://www.remoet.dev/api-keys). The same key works for both MCP and the REST API.
 
-### B. OAuth 2.1 (Claude Web custom connectors)
+```
+Authorization: Bearer <key>
+```
 
-Claude Web's custom connector flow uses OAuth 2.1 with PKCE. Point the connector at `https://api.remoet.dev/mcp` and Claude handles the authorize → token exchange automatically. Under the hood, the access token IS your API key — same auth surface, different handshake.
+`x-api-key: <key>` is accepted as a fallback for clients that don't expose the `Authorization` header.
+
+### B. OAuth 2.1 with PKCE (Claude Web custom connectors)
+
+Point a custom connector at `https://api.remoet.dev/mcp/oauth` and the client handles the authorize → token exchange. The server advertises standard discovery metadata at `/.well-known/oauth-authorization-server/mcp/oauth` and `/.well-known/oauth-protected-resource/mcp/oauth`. Under the hood the access token IS the API key — same auth surface, different handshake.
 
 Custom connectors on Claude Web are **Free-tier eligible** (1 connector on Free, no per-user limit on paid).
 
 ## What the agent can do
 
-The server exposes a large set of tools (47+ at last count) across four areas:
+The server currently exposes ~48 tools across five areas. The live `tools/list` request is the source of truth; this table is a map.
 
-- **Profile** — read/write your profile, jobs, projects, education, link trees
-- **Discovery** — list listings, search by tech stack, star/unstar companies
-- **Platform** — visibility settings, digest preferences, your apps, link trees
-- **Applications** — track job applications, notes, messages
+| Area | Examples | What it's for |
+|---|---|---|
+| Profile | `get_profile`, `update_profile`, `add_job`, `add_project`, `add_education`, `add_link_tree` | Read and write your career data |
+| Discovery | `list_listings`, `search_listings_by_tech_stack`, `star_listing`, `unstar_listing`, `get_starred_listings` | Find and follow companies |
+| Platform | `update_visibility`, `update_digest_settings`, `list_apps`, `update_link_tree` | App settings, digest cadence, link trees |
+| Applications | `apply_to_job`, `list_applications`, `add_application_note`, `get_messages` | Track applications and conversations |
+| Plan | `get_plan`, `get_usage` | Inspect your tier, quotas, and current daily usage |
 
-The tool list is discovered live via the standard MCP `tools/list` request — the docs intentionally don't enumerate every tool by name because the set evolves. Connect a client and inspect what's offered.
+Names above are illustrative — connect any MCP client and run `tools/list` for the canonical, current set.
+
+### Tool result shape
+
+Every tool returns the standard MCP content-block format. Successful tools return `{ content: [{ type: "text", text: "..." }] }` (text content blocks). Errors return `{ isError: true, content: [{ type: "text", text: "Error: ..." }] }` — your client sees the response but should treat it as an error and surface it to the user. This means a single bad tool call never crashes the session.
+
+## Session lifecycle
+
+The transport uses session IDs that are minted on initialize and threaded through subsequent requests.
+
+- **TTL**: sessions auto-expire after a period of inactivity. Stale or unknown session IDs return **HTTP 404** (per the MCP spec). Your client should treat a 404 as "session is gone, reconnect" and re-initialize automatically — not as a hard error.
+- **Limits**: max ~3 concurrent sessions per API key, 10k sessions total across the server. Hitting the per-key cap reuses the oldest session.
+- **Graceful shutdown**: `DELETE /mcp` (or `/mcp/oauth`) with a session header closes the session immediately. Clients should call this on quit.
+
+Most MCP clients handle reconnect transparently if they implement the spec. If yours doesn't, that's a client bug, not a server one.
 
 ## Client setup
 
 ### Claude Code
 
 ```sh
-claude mcp add remoet-prod -- npx -y mcp-remote https://api.remoet.dev/mcp --header "Authorization: Bearer <YOUR_API_KEY>"
+claude mcp add remoet-prod https://api.remoet.dev/mcp --transport http --header "x-api-key: YOUR_API_KEY"
 ```
 
-Then restart Claude Code. The server name `remoet-prod` is a convention — name with the suffix `-prod` / `-stage` / `-local` to disambiguate environments.
+Restart Claude Code (the new server only appears after a restart, not just `/mcp` reload). The server name `remoet-prod` is a Remoet-internal convention — we suffix with `-prod` / `-stage` / `-local` to disambiguate environments. Your client doesn't enforce this; it's for your own sanity.
+
+If you're on a Claude Code version that doesn't yet support `--transport http`, fall back to the `mcp-remote` stdio→HTTP proxy:
+
+```sh
+claude mcp add remoet-prod -- npx -y mcp-remote https://api.remoet.dev/mcp --header "Authorization: Bearer YOUR_API_KEY"
+```
 
 ### Claude Web (Desktop / claude.ai)
 
-Settings → Connectors → "Add custom connector" → URL `https://api.remoet.dev/mcp`. Claude walks you through OAuth.
+Settings → Connectors → **Add custom connector** → URL `https://api.remoet.dev/mcp/oauth`. Claude walks you through the OAuth flow. No API key needed in the UI — Claude exchanges its own credentials for an access token after you authorize.
 
 ### Cursor / Windsurf / VS Code agents
 
-Each client has its own MCP config syntax. The shared shape:
+Native HTTP transport (preferred):
+
+```json
+{
+  "mcpServers": {
+    "remoet-prod": {
+      "url": "https://api.remoet.dev/mcp",
+      "transport": "http",
+      "headers": { "x-api-key": "YOUR_API_KEY" }
+    }
+  }
+}
+```
+
+If your client only speaks stdio, use the `mcp-remote` shim:
 
 ```json
 {
@@ -69,7 +118,7 @@ Each client has its own MCP config syntax. The shared shape:
 }
 ```
 
-Drop this into the client's MCP config file (location varies — Cursor: `~/.cursor/mcp.json`, Windsurf: `~/.codeium/windsurf/mcp_config.json`, etc.).
+Config locations vary — Cursor: `~/.cursor/mcp.json`, Windsurf: `~/.codeium/windsurf/mcp_config.json`. Check your client's docs for the exact path.
 
 ## Quotas
 
@@ -79,14 +128,14 @@ Drop this into the client's MCP config file (location varies — Cursor: `~/.cur
 | Pro | 150 | 5,000 |
 | Max | unlimited | unlimited |
 
-Quotas reset at 00:00 UTC. Hitting the cap returns an error from the tool call; the session stays alive and resets the next day. See <Link href="/tiers">Tiers</Link> for the full feature breakdown.
+Quotas reset at 00:00 UTC. Hitting the cap returns an error from the next tool call (`isError: true`); the session stays alive and resets the next day. See <Link href="/tiers">Tiers</Link> for the full plan breakdown and <Link href="/errors">Errors</Link> for the response shape.
 
 ## Safety
 
-- Tool results returned by the server include text we collected from external sources (job descriptions, company profiles). Treat that text as untrusted from a prompt-injection standpoint when designing agent workflows.
-- Each session is rate-limited at the transport layer too — burst spikes are throttled before they reach the daily quota.
-- Sessions auto-expire and reconnect — your agent handles this transparently if it implements the MCP spec correctly.
+- **Treat tool results as untrusted.** Many tools return text from external sources (job descriptions, company profiles). Build your agent prompts assuming prompt-injection attempts can land in tool output.
+- **Burst limiting.** Each session is throttled at the transport layer before it ever reaches the daily quota counter, so a runaway agent can't drain a day's allowance in seconds.
+- **Per-key auditing.** Every tool call is stamped with the API key that triggered it. Revoke a key from [www.remoet.dev/api-keys](https://www.remoet.dev/api-keys) to kill all of its in-flight sessions immediately.
 
 ## Reporting issues
 
-The MCP server is in active development. If a tool misbehaves or returns surprising data, open an issue at [github.com/remoet-labs/remoet-docs](https://github.com/remoet-labs/remoet-docs) or message us via the consumer site's Discord link.
+The MCP server is in active development. If a tool misbehaves, open an issue at [github.com/remoet-labs/remoet-docs](https://github.com/remoet-labs/remoet-docs) or join the [Discord](https://discord.gg/yxJA6cBs8U).
