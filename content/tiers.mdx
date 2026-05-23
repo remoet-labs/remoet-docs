@@ -1,0 +1,42 @@
+import Link from 'next/link'
+
+# Tiers
+
+remoet.dev has three tiers. The free tier is the right starting point for most developers — you can connect an AI agent, star companies, and build against the REST API without paying anything.
+
+## Plan comparison
+
+| Feature | Free | Pro | Max |
+|---|---|---|---|
+| Price | $0 | $15/mo | $29/mo |
+| Star caps (companies you follow) | 10 | 30 | 75 |
+| Unstars per month | 5 | 15 | unlimited |
+| MCP requests / day | 30 | 150 | unlimited |
+| REST API requests / day | 300 | 5,000 | unlimited |
+| Job data freshness | 1 week delay | live | live |
+| Link trees | 1 | 10 | unlimited |
+
+Prices are inclusive of tax (Swedish VAT customers pay $15 total, not $15 + tax). USD-only for now.
+
+## A few things to know
+
+**Starring is free.** No budget cost per star — you only consume budget when you *unstar*. This prevents cycling exploits where you could trivially churn through companies.
+
+**Unstars reset monthly.** Free gets 5, Pro gets 15, Max is unlimited. The monthly clock starts when you upgrade and resets at the same day of the month.
+
+**MCP and REST quotas are separate.** Daily quota for MCP doesn't drain your REST budget and vice versa. Both reset at 00:00 UTC.
+
+**Job data delay on Free.** Free users see jobs that are at least a week old. Pro and Max see jobs as soon as the scraper publishes them. Useful if you care about being first to apply.
+
+**Plan changes apply immediately.** Upgrade via [www.remoet.dev/settings](https://www.remoet.dev/settings). Downgrades take effect at the end of your current billing period (Stripe handles the proration).
+
+## Refunds and disputes
+
+We process payments through Stripe. Refunds available from the Stripe Customer Portal (linked from /settings). If something looks wrong on your account, refund first and we'll sort out the dispute — chargebacks are expensive on both sides.
+
+## What's the same across tiers
+
+- API key generation, 5 keys per account, key revocation
+- The full set of MCP tools and REST endpoints (quotas differ, not the surface)
+- Profile data export (the <Link href="/full">/user/full</Link> endpoint works for all tiers)
+- OAuth flow for Claude Web custom connectors

@@ -2,27 +2,44 @@ import Link from 'next/link'
 
 # Get Started
 
-## Create a developer profile
+## Sign up
 
-The first thing you need to do is create a developer profile at [remoet.dev](https://remoet.dev).
-You will need a Github account to sign up.
+Create a developer profile at [www.remoet.dev](https://www.remoet.dev). You can sign in with GitHub or Google.
 
-## Generate your API Key
+## Generate an API key
 
-When you have created your developer profile, navigate to your API keys at [remoet.dev/profile/api](https://remoet.dev/profile/api)
-There you can generate up to 5 API Keys.
+Once signed in, head to [www.remoet.dev/api-keys](https://www.remoet.dev/api-keys). You can hold up to **5 keys per account** at any time. Each key works against both the MCP server and the REST API.
 
-Each Key allows you to make 1000 requests a month.
+Daily request limits apply per account (not per key):
+
+| Tier | REST API requests / day | MCP requests / day |
+|---|---|---|
+| Free | 300 | 30 |
+| Pro | 5,000 | 150 |
+| Max | unlimited | unlimited |
+
+Limits reset daily UTC. See <Link href="/tiers">Tiers</Link> for the full plan breakdown.
 
 ## Use your key
 
-When you have generated a key you are ready to use it on one of our endpoints.
+Two ways to plug in:
 
-## Endpoints
-- <Link href="/hello">`user/hello`</Link>
-- <Link href="/full">`user/full`</Link>
-- <Link href="/links">`user/links`</Link>
-- <Link href="/jobs">`user/jobs`</Link>
-- <Link href="/projects">`user/projects`</Link>
-- <Link href="/education">`user/education`</Link>
-- <Link href="/linktrees">`user/linktrees`</Link>
+### A. MCP server (for AI agents)
+
+If you're connecting an AI agent — Claude, Cursor, Codex, Windsurf — see <Link href="/mcp">MCP</Link> for the install URL and per-client setup. This is the recommended path for agentic workflows.
+
+### B. REST API (for your own code)
+
+If you're building a portfolio site or pulling data into your own tooling, the REST API is what you want. Set the `Authorization: Bearer <Your key>` header on any of the endpoints below.
+
+#### Endpoints
+
+- <Link href="/hello">`GET /user/hello`</Link> — health check
+- <Link href="/full">`GET /user/full`</Link> — everything in one shot
+- <Link href="/links">`GET /user/links`</Link> — social links
+- <Link href="/jobs">`GET /user/jobs`</Link> — work history
+- <Link href="/projects">`GET /user/projects`</Link> — project cards
+- <Link href="/education">`GET /user/education`</Link> — education entries
+- <Link href="/linktrees">`GET /user/linktrees`</Link> — your link trees
+
+All endpoints are served from `https://api.remoet.dev`. See <Link href="/get-started/authorization">Authorization</Link> for the header shape.

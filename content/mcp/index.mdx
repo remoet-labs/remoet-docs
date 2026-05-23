@@ -1,0 +1,92 @@
+import Link from 'next/link'
+
+# MCP server
+
+The remoet.dev MCP server lets your AI agent read and write your remoet.dev data directly — your starred companies, your job applications, your profile, your link trees. Use it from Claude, Cursor, Codex, Windsurf, or any client that speaks the [Model Context Protocol](https://modelcontextprotocol.io).
+
+Free tier eligible. You only need a remoet.dev account and one API key.
+
+## Endpoint
+
+```
+https://api.remoet.dev/mcp
+```
+
+The server uses the official [Streamable HTTP transport](https://modelcontextprotocol.io/specification/2025-03-26/basic/transports) (`POST`, `GET`, `DELETE` against `/mcp`).
+
+## Authentication
+
+Two options:
+
+### A. API key header (most clients)
+
+Pass your key on the `Authorization: Bearer <key>` header. Generate keys at [www.remoet.dev/api-keys](https://www.remoet.dev/api-keys). Same key works for both MCP and the REST API.
+
+### B. OAuth 2.1 (Claude Web custom connectors)
+
+Claude Web's custom connector flow uses OAuth 2.1 with PKCE. Point the connector at `https://api.remoet.dev/mcp` and Claude handles the authorize → token exchange automatically. Under the hood, the access token IS your API key — same auth surface, different handshake.
+
+Custom connectors on Claude Web are **Free-tier eligible** (1 connector on Free, no per-user limit on paid).
+
+## What the agent can do
+
+The server exposes a large set of tools (47+ at last count) across four areas:
+
+- **Profile** — read/write your profile, jobs, projects, education, link trees
+- **Discovery** — list listings, search by tech stack, star/unstar companies
+- **Platform** — visibility settings, digest preferences, your apps, link trees
+- **Applications** — track job applications, notes, messages
+
+The tool list is discovered live via the standard MCP `tools/list` request — the docs intentionally don't enumerate every tool by name because the set evolves. Connect a client and inspect what's offered.
+
+## Client setup
+
+### Claude Code
+
+```sh
+claude mcp add remoet-prod -- npx -y mcp-remote https://api.remoet.dev/mcp --header "Authorization: Bearer <YOUR_API_KEY>"
+```
+
+Then restart Claude Code. The server name `remoet-prod` is a convention — name with the suffix `-prod` / `-stage` / `-local` to disambiguate environments.
+
+### Claude Web (Desktop / claude.ai)
+
+Settings → Connectors → "Add custom connector" → URL `https://api.remoet.dev/mcp`. Claude walks you through OAuth.
+
+### Cursor / Windsurf / VS Code agents
+
+Each client has its own MCP config syntax. The shared shape:
+
+```json
+{
+  "mcpServers": {
+    "remoet-prod": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://api.remoet.dev/mcp",
+               "--header", "Authorization: Bearer YOUR_API_KEY"]
+    }
+  }
+}
+```
+
+Drop this into the client's MCP config file (location varies — Cursor: `~/.cursor/mcp.json`, Windsurf: `~/.codeium/windsurf/mcp_config.json`, etc.).
+
+## Quotas
+
+| Tier | MCP requests / day | REST API requests / day |
+|---|---|---|
+| Free | 30 | 300 |
+| Pro | 150 | 5,000 |
+| Max | unlimited | unlimited |
+
+Quotas reset at 00:00 UTC. Hitting the cap returns an error from the tool call; the session stays alive and resets the next day. See <Link href="/tiers">Tiers</Link> for the full feature breakdown.
+
+## Safety
+
+- Tool results returned by the server include text we collected from external sources (job descriptions, company profiles). Treat that text as untrusted from a prompt-injection standpoint when designing agent workflows.
+- Each session is rate-limited at the transport layer too — burst spikes are throttled before they reach the daily quota.
+- Sessions auto-expire and reconnect — your agent handles this transparently if it implements the MCP spec correctly.
+
+## Reporting issues
+
+The MCP server is in active development. If a tool misbehaves or returns surprising data, open an issue at [github.com/remoet-labs/remoet-docs](https://github.com/remoet-labs/remoet-docs) or message us via the consumer site's Discord link.

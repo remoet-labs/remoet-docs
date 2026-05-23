@@ -2,20 +2,55 @@ import Link from 'next/link'
 
 # Authorization
 
-We already described how to generate your API key in the <Link href="/get-started">getting started</Link> chapter.
+The <Link href="/get-started">Get Started</Link> page covers how to mint an API key. This page covers how to pass it to a request.
 
-After you've done that, you are ready to authenticate your requests made to the API.
+## Bearer scheme
 
-## Request authorization
+All REST endpoints use the standard `Authorization: Bearer <key>` header.
 
-We have adopted for the traditional `Bearer <key>` scheme for authenticating your requests.
-
-In your `Headers` simply add:
-
+```http
+GET /user/hello HTTP/1.1
+Host: api.remoet.dev
+Authorization: Bearer your_api_key_here
 ```
+
+cURL:
+
+```bash
+curl -H "Authorization: Bearer your_api_key_here" https://api.remoet.dev/user/hello
+```
+
+JavaScript fetch:
+
+```javascript
+const res = await fetch("https://api.remoet.dev/user/hello", {
+  headers: { Authorization: `Bearer ${process.env.REMOET_API_KEY}` },
+});
+```
+
+## What an invalid or missing key returns
+
+```json
 {
-  "authorization": "Bearer <Your key>"
+  "statusCode": 401,
+  "message": "Invalid API Key",
+  "error": "Unauthorized"
 }
 ```
 
-And you should be good to go 🙌
+## Keeping the key safe
+
+Treat the key like a password. Never ship it to the browser — use it from server-side code, or from `.env` files that aren't committed. If a key leaks, revoke it from [www.remoet.dev/api-keys](https://www.remoet.dev/api-keys) and generate a new one.
+
+## Rate limits
+
+There are two layers:
+
+- **Burst**: 60 requests per minute per endpoint (30/min for `/user/full`).
+- **Daily quota**: tier-based — see <Link href="/get-started">Get Started</Link>.
+
+Burst rejections return `429 Too Many Requests`. Quota exhaustion returns `403 Forbidden`.
+
+## MCP
+
+The MCP server uses the same key over the `Authorization: Bearer <key>` header or via an OAuth flow (Claude Web's custom connector). See <Link href="/mcp">MCP</Link>.

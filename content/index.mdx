@@ -1,23 +1,22 @@
 # Introduction
 
-Welcome to remoet.dev developer documentation!
+Welcome to the remoet.dev developer documentation.
 
 ## What is remoet.dev?
 
-remoet.dev is a project on a mission to connect global tech talent with global tech companies.
+remoet.dev tracks tech jobs from companies you care about and connects them to your AI agents. Browse the consumer site at [www.remoet.dev](https://www.remoet.dev).
 
-If you have stumbled onto this page randomly, we suggest you to give us a visit at our main site [remoet.dev](https://remoet.dev)
+## What can I build against?
 
-## What is remoet.dev API
+Two surfaces are available to developers:
 
-The public facing developer `API` is a set of `REST` `API`s for users on [remoet.dev](https://remoet.dev) to
-access their data programatically.
+- **[MCP server](/mcp)** — the agent-native interface. Connect Claude, Cursor, Codex, or any MCP-capable client and let the agent read and write your remoet.dev data directly. Free tier eligible.
+- **REST API** — the original developer interface. Lets you fetch your own profile data (jobs, projects, education, links, link trees) programmatically. Useful for portfolio sites and external integrations.
 
-For instance when developers are building their own portfolio site [remoet.dev](https://remoet.dev) can act as a single source of
-truth for their career related information.
+Both authenticate against the same key you generate at [www.remoet.dev/api-keys](https://www.remoet.dev/api-keys).
 
-## Why?
+## Why expose this?
 
-We are developers and we are building [remoet.dev](https://remoet.dev) for developers. That means we won't gatekeep your data.
-It shall be fully accessible to you and you can go off and build freely with that data. That's our philosophy and it's a shame
-other platforms does not let you do this.
+We're building for developers. Your data is yours; you should be able to pull it out and build on top of it. That's the philosophy. No gatekeeping.
+
+If you want to plug an agent into your remoet.dev data, jump to [MCP](/mcp). If you want to render your profile on your own site, check the [REST endpoints](/get-started) or the [starter template](/starter-template).
