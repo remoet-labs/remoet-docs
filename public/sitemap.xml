@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://docs.remoet.dev/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://docs.remoet.dev/about</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://docs.remoet.dev/education</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://docs.remoet.dev/full</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://docs.remoet.dev/get-started</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://docs.remoet.dev/get-started/authorization</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://docs.remoet.dev/hello</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://docs.remoet.dev/jobs</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://docs.remoet.dev/links</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://docs.remoet.dev/linktrees</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://docs.remoet.dev/projects</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://docs.remoet.dev/starter-template</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+</urlset>
