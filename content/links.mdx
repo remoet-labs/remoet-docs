@@ -1,6 +1,13 @@
+---
+title: GET /user/links
+description: Returns the social links you've set on your profile (homepage, GitHub, Twitter, LinkedIn, etc.). Private fields are scrubbed to null.
+---
+
+import Link from 'next/link'
+
 # `GET /user/links`
 
-Returns the social links you have entered on your profile.
+Returns the social links you've set on your profile.
 
 ## Basic Information
 - type: `REST`
@@ -62,7 +69,13 @@ class PublicUserLinksDto {
 }
 ```
 
-Fields you haven't filled in return `null`.
+Fields you haven't filled in return `null`. Fields you've marked private also return `null` — the endpoint scrubs them server-side. If you need the raw values regardless of visibility, use <Link href="/full">`/user/full`</Link> instead (your own key, your own data, no scrub).
+
+## See also
+
+- <Link href="/full">`/user/full`</Link> — same fields plus the rest of your profile, with `isPublic` flags preserved
+- <Link href="/get-started/authorization">Authorization</Link>
+- [Errors](/errors)
 
 ## Non authenticated response
 ```json

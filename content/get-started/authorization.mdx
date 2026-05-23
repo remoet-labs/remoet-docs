@@ -1,3 +1,8 @@
+---
+title: Authorization
+description: Pass your remoet.dev API key on the standard Authorization Bearer header. Same key works for both the REST API and the MCP server.
+---
+
 import Link from 'next/link'
 
 # Authorization
@@ -28,15 +33,22 @@ const res = await fetch("https://api.remoet.dev/user/hello", {
 });
 ```
 
-## What an invalid or missing key returns
+## What a bad key returns
+
+The exact 401 body depends on what's wrong with the request:
 
 ```json
-{
-  "statusCode": 401,
-  "message": "Invalid API Key",
-  "error": "Unauthorized"
-}
+// Authorization header is missing entirely
+{ "statusCode": 401, "message": "Unauthorized" }
+
+// Header is present but the key isn't recognised
+{ "statusCode": 401, "message": "Invalid API Key", "error": "Unauthorized" }
+
+// Key is recognised but expired (revoked or aged out)
+{ "statusCode": 401, "message": "API Key Expired", "error": "Unauthorized" }
 ```
+
+If you want to distinguish "missing header" from "bad key" in your client, key off the `message` field. See [Errors](/errors) for the full error catalog.
 
 ## Keeping the key safe
 
@@ -49,7 +61,7 @@ There are two layers:
 - **Burst**: 60 requests per minute per endpoint (30/min for `/user/full`).
 - **Daily quota**: tier-based — see <Link href="/get-started">Get Started</Link>.
 
-Burst rejections return `429 Too Many Requests`. Quota exhaustion returns `403 Forbidden`.
+Both layers return `429 Too Many Requests` on exhaustion. The body distinguishes them — see [Errors](/errors).
 
 ## MCP
 

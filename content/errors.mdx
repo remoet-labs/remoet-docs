@@ -1,0 +1,124 @@
+---
+title: Errors
+description: Every error response the remoet.dev API surfaces, with status codes, exact JSON bodies, and what triggers each. Use this to wire retry and recovery logic.
+---
+
+import Link from 'next/link'
+
+# Errors
+
+Every response that isn't a 2xx is documented here. Wire your client to key off `statusCode` first, then `message` if you need to distinguish variants within a code.
+
+## 400 — Bad Request
+
+Returned when the request shape is wrong. Common cases:
+
+- **MCP**: missing or malformed initialize handshake on first request to `/mcp`.
+- **REST**: a path parameter fails validation (e.g. an invalid linktree slug shape).
+
+```json
+{ "statusCode": 400, "message": "...specific reason...", "error": "Bad Request" }
+```
+
+## 401 — Unauthorized
+
+The exact body varies. Key off `message`:
+
+```json
+// Header missing
+{ "statusCode": 401, "message": "Unauthorized" }
+
+// Header present, key unknown
+{ "statusCode": 401, "message": "Invalid API Key", "error": "Unauthorized" }
+
+// Header present, key recognised, expired or revoked
+{ "statusCode": 401, "message": "API Key Expired", "error": "Unauthorized" }
+```
+
+Recovery: regenerate at [www.remoet.dev/api-keys](https://www.remoet.dev/api-keys).
+
+## 404 — Not Found
+
+### Resource by slug doesn't exist
+
+```json
+{ "statusCode": 404, "message": "Link tree not found", "error": "Not Found" }
+```
+
+Returned by routes like `/user/linktrees/:slug` when the slug isn't yours or doesn't exist.
+
+### MCP session expired
+
+```
+HTTP/1.1 404 Not Found
+```
+
+The MCP server returns 404 (per spec) when a session ID is stale or unknown. Your client should treat this as "reconnect" — re-initialize the session rather than treat it as a hard error. Compliant MCP clients handle this transparently.
+
+## 429 — Too Many Requests
+
+Both burst and daily quota exhaustion return 429. Distinguish them by `message`:
+
+```json
+// Burst: more than 60 req/min on most endpoints, 30/min on /user/full
+{ "statusCode": 429, "message": "Rate limit exceeded" }
+
+// Daily quota: over your plan's daily request cap
+{ "statusCode": 429, "message": "Daily API limit exceeded. Resets at midnight UTC." }
+```
+
+Recovery:
+
+- **Burst**: back off ~5 seconds and retry. Jitter helps if you're parallelising.
+- **Daily**: wait until 00:00 UTC, or upgrade your plan via <Link href="/tiers">Tiers</Link>.
+
+## 500 — Internal Server Error
+
+Something went wrong on our end. The response body may be empty or include a generic message:
+
+```json
+{ "statusCode": 500, "message": "Internal server error" }
+```
+
+Recovery: retry with exponential backoff. If a route 500s consistently, open an issue at [github.com/remoet-labs/remoet-docs](https://github.com/remoet-labs/remoet-docs) or ping us on [Discord](https://discord.gg/yxJA6cBs8U).
+
+## 503 — Service Unavailable
+
+Returned by billing-gated endpoints when paid tiers are disabled platform-wide (the kill switch for emergency rollback). Rare — only fires if we've temporarily turned off billing. Retry later.
+
+```json
+{ "statusCode": 503, "message": "Paid tiers temporarily disabled", "error": "Service Unavailable" }
+```
+
+## MCP tool-level errors
+
+A tool call that fails returns success at the transport level (HTTP 200) but flips `isError: true` in the JSON-RPC result:
+
+```json
+{
+  "result": {
+    "isError": true,
+    "content": [{ "type": "text", "text": "Error: ...explanation..." }]
+  }
+}
+```
+
+This means a bad tool call never tears down the session. Your client should surface the error text to the user and let them retry or call a different tool.
+
+## Recommended retry policy
+
+| Status | Retry? | How |
+|---|---|---|
+| 400 | No | Fix the request |
+| 401 | No | Refresh credentials |
+| 404 (resource) | No | Resource gone or never existed |
+| 404 (MCP session) | Yes | Re-initialize the session |
+| 429 (burst) | Yes | Back off ~5s with jitter |
+| 429 (daily) | No until tomorrow / upgrade | Honour the reset |
+| 500/502/503/504 | Yes | Exponential backoff: 1s, 2s, 4s, 8s, give up after ~4 attempts |
+
+## See also
+
+- <Link href="/get-started/authorization">Authorization</Link> — header shape
+- <Link href="/tiers">Tiers</Link> — daily quotas per plan
+- <Link href="/mcp">MCP server</Link> — session lifecycle and tool result shape

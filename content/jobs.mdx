@@ -1,6 +1,13 @@
-# `GET/user/jobs`
+---
+title: GET /user/jobs
+description: Returns your work history — every job you've added to your remoet.dev profile, sorted by current first then start-date descending.
+---
 
-Returns all the user's jobs
+import Link from 'next/link'
+
+# `GET /user/jobs`
+
+Returns your full work history, sorted with current roles first, then by start date descending.
 
 ## Basic Information
 - type: `REST`
@@ -87,3 +94,11 @@ class PublicUserJobDto {
     "error": "Unauthorized"
 }
 ```
+
+`listingId` points to the company (listing) the job is at. Use it to cross-reference via the MCP server if your client needs more context.
+
+## See also
+
+- <Link href="/full">`/user/full`</Link> — same jobs plus the rest of your profile
+- <Link href="/get-started/authorization">Authorization</Link>
+- [Errors](/errors)

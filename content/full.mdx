@@ -1,172 +1,141 @@
-# `GET/user/full`
+---
+title: GET /user/full
+description: Returns everything on your profile in one shot — base account, profile fields with visibility flags, jobs, projects, link trees, and education.
+---
 
-This endpoint returns all data you have entered into your profile.
-It ignores any visibility setting, and returns everything we got.
+import Link from 'next/link'
 
-## Basic
-- type: `REST`
+# `GET /user/full`
+
+Returns everything on your remoet.dev profile in a single response. Useful for hydrating an external portfolio site with one request.
+
+Unlike <Link href="/links">`/user/links`</Link> (which scrubs fields you've marked private), this endpoint **preserves the per-field visibility flags** so the caller can decide what to render. Treat the response as private data — your key is the only thing standing between it and the open web.
+
+## Basic information
+
 - method: `GET`
-- url: https://api.remoet.dev/user/full
+- url: `https://api.remoet.dev/user/full`
 - returns: `JSON`
+- burst limit: 30 requests / minute (lower than the other endpoints because the payload is heavier)
 
 ## cURL
-```cURL
-curl --location 'https://api.remoet.dev/user/full' --header 'Authorization: Bearer <Your key>'
+
+```bash
+curl -H "Authorization: Bearer <Your key>" https://api.remoet.dev/user/full
 ```
 
 ## HTTP
+
 ```http
 GET /user/full HTTP/1.1
 Host: api.remoet.dev
 Authorization: Bearer <Your key>
 ```
 
-## JavaScript Fetch
+## JavaScript fetch
+
 ```javascript
-const myHeaders = new Headers();
-myHeaders.append("Authorization", `Bearer ${key}`);
-
-const requestOptions = {
-  method: "GET",
-  headers: myHeaders
-};
-
-fetch("https://api.remoet.dev/user/full", requestOptions)
-  .then((response) => response.text())
-  .then((result) => console.log(result))
-  .catch((error) => console.error(error));
+const res = await fetch("https://api.remoet.dev/user/full", {
+  headers: { Authorization: `Bearer ${process.env.REMOET_API_KEY}` },
+});
+const me = await res.json();
 ```
 
-## Result
+## Response shape
+
 ```json
 {
-    "createdAt": <timestamp>,
-    "updatedAt": <timestamp>,
-    "ghId": <number>,
-    "email": <string>,
-    "profile": {
-        "updatedAt": <timestamp>,
-        "isPublic": <Boolean>,
-        "slug": <string | null>,
-        "name": {
-            "isPublic": <boolean>,
-            "value": <string | null>
-        },
-        "avatarUrl": {
-            "isPublic": <boolean>,
-            "value": <string | null>
-        },
-        "phone": {
-            "isPublic": <boolean>,
-            "value": <string | null>
-        },
-        "email": {
-            "isPublic": <boolean>,
-            "value": <string | null>
-        },
-        "url": {
-            "isPublic": <boolean>,
-            "value": <string | null>
-        },
-        "summary": {
-            "isPublic": <boolean>,
-            "value": <string | null>
-        },
-        "location": {
-            "isPublic": <boolean>,
-            "value": <string | null>
-        },
-        "githubUrl": {
-            "isPublic": <boolean>,
-            "value": <string | null>
-        },
-        "facebookUrl": {
-            "isPublic": <boolean>,
-            "value": <string | null>
-        },
-        "twitterUrl": {
-            "isPublic": <boolean>,
-            "value": <string | null>
-        },
-        "linkedinUrl": {
-            "isPublic": <boolean>,
-            "value": <string | null>
-        },
-        "youtubeUrl": {
-            "isPublic": <boolean>,
-            "value": <string | null>
-        }
-    },
-    "jobs": <array> [
-        {
-            "createdAt": <timestamp>,
-            "updatedAt": <timestamp>,
-            "title": <string>,
-            "startDate": <timestamp>,
-            "endDate": <timestamp | null>,
-            "isCurrent": <boolean>,
-            "isPublic": <boolean>,
-            "companyName": <string>,
-            "technologies": <array> [<string>],
-            "description": <string | null>,
-            "isRemote": <boolean>,
-            "companyUrl": <string>,
-        }
-    ],
-    "projects": <array> [
-        {
-            "title": <string>,
-            "shortDescription": <string>,
-            "technologies": <array> [<string>],
-            "isCurrent": <boolean>,
-            "isRemote": <boolean>,
-            "isOpenSource": <boolean>,
-            "description": <string | null>,
-            "role": <string | null>,
-            "startDate": <timestamp | null>,
-            "endDate": <timestamp | null>,
-            "repoUrl": <string | null>,
-            "demoUrl": <string | null>,
-            "jobId": <string | null>
-        }
-    ],
-    "linkTrees": <array> [
-        {
-            "id": <string>,
-            "title": <string>,
-            "description": <string | null>,
-            "slug": <string>,
-            "links": <array> [
-                {
-                    "id": <string>,
-                    "label": <string>,
-                    "url": <string>
-                }
-            ],
-            "createdAt": <timestamp>,
-            "updatedAt": <timestamp>
-        }
-    ],
-    "education": <array> [
-        {
-            "institution": <string>,
-            "institutionUrl": <string | null>,
-            "studyLevel": <string | null>,
-            "fieldOfStudy": <string | null>,
-            "startDate": <timestamp | null>,
-            "endDate": <timestamp | null>,
-            "isCurrent": <boolean>,
-            "description": <string | null>
-        }
-    ]
+  "createdAt": "2026-01-01T00:00:00Z",
+  "updatedAt": "2026-04-12T08:30:00Z",
+  "ghId": 12345,
+  "email": "you@example.com",
+  "profile": {
+    "updatedAt": "2026-04-12T08:30:00Z",
+    "isPublic": true,
+    "slug": "you",
+    "name":        { "isPublic": true,  "value": "Your Name" },
+    "avatarUrl":   { "isPublic": true,  "value": "https://…" },
+    "phone":       { "isPublic": false, "value": "+46…" },
+    "url":         { "isPublic": true,  "value": "https://you.dev" },
+    "summary":     { "isPublic": true,  "value": "Engineer" },
+    "location":    { "isPublic": true,  "value": "Stockholm" },
+    "githubUrl":   { "isPublic": true,  "value": "https://github.com/you" },
+    "facebookUrl": { "isPublic": false, "value": null },
+    "twitterUrl":  { "isPublic": true,  "value": "https://twitter.com/you" },
+    "linkedinUrl": { "isPublic": true,  "value": "https://linkedin.com/in/you" },
+    "youtubeUrl":  { "isPublic": false, "value": null }
+  },
+  "jobs": [
+    {
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z",
+      "userId": "65fa…",
+      "title": "Senior Engineer",
+      "startDate": "2024-01-01T00:00:00Z",
+      "endDate": null,
+      "isCurrent": true,
+      "isPublic": true,
+      "companyName": "Acme",
+      "technologies": ["TypeScript", "PostgreSQL"],
+      "description": "…",
+      "isRemote": true,
+      "companyUrl": "https://acme.example",
+      "listingId": "65fb…"
+    }
+  ],
+  "projects": [
+    {
+      "title": "remoet-starter",
+      "shortDescription": "Portfolio template",
+      "technologies": ["Next.js", "Tailwind"],
+      "isCurrent": false,
+      "isRemote": true,
+      "isOpenSource": true,
+      "description": null,
+      "role": "Maintainer",
+      "startDate": "2025-06-01T00:00:00Z",
+      "endDate": null,
+      "repoUrl": "https://github.com/you/remoet-starter",
+      "demoUrl": null,
+      "jobId": null
+    }
+  ],
+  "linkTrees": [
+    {
+      "id": "65fa…",
+      "title": "Side projects",
+      "description": null,
+      "slug": "side",
+      "links": [
+        { "id": "65fb…", "label": "GitHub", "url": "https://github.com/you" }
+      ],
+      "createdAt": "2026-04-01T12:00:00Z",
+      "updatedAt": "2026-04-12T08:30:00Z"
+    }
+  ],
+  "education": [
+    {
+      "institution": "KTH",
+      "institutionUrl": "https://kth.se",
+      "studyLevel": "MASTER",
+      "fieldOfStudy": "Computer Science",
+      "startDate": "2018-09-01T00:00:00Z",
+      "endDate": "2023-06-01T00:00:00Z",
+      "isCurrent": false,
+      "description": null
+    }
+  ]
 }
 ```
 
-## Non authenticated response
-```json
-{
-    "statusCode": 401,
-    "message": "Invalid API Key",
-    "error": "Unauthorized"
-}
-```
+### Field notes
+
+- `profile.*` fields wrapped as `{ isPublic, value }` are **DataField** objects. The visibility flag is currently informational — your client gets the value either way and decides what to render.
+- `jobs[].userId` is your own MongoDB id; `jobs[].listingId` references the listing (company) the role is at. Use the listing id for further lookups via the MCP server if the agent needs more context.
+- `linkTrees[].links[]` returns `{ id, label, url }` only. View and click counts are server-side and not exposed.
+
+## See also
+
+- <Link href="/jobs">`/user/jobs`</Link>, <Link href="/projects">`/user/projects`</Link>, <Link href="/education">`/user/education`</Link>, <Link href="/linktrees">`/user/linktrees`</Link> for narrower fetches
+- <Link href="/get-started/authorization">Authorization</Link> for header shape and bad-key responses
+- [Errors](/errors) for full error catalog
