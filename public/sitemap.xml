@@ -10,6 +10,8 @@
   <url><loc>https://docs.remoet.dev/jobs</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://docs.remoet.dev/links</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://docs.remoet.dev/linktrees</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://docs.remoet.dev/mcp</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
   <url><loc>https://docs.remoet.dev/projects</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://docs.remoet.dev/starter-template</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://docs.remoet.dev/tiers</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
 </urlset>
