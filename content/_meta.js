@@ -24,4 +24,7 @@ export default {
     title: 'Discord ↗',
     href: 'https://discord.gg/yxJA6cBs8U',
   },
+  'anthropic-reviewers': {
+    display: 'hidden',
+  },
 }

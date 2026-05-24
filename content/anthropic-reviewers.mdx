@@ -1,0 +1,74 @@
+---
+title: Connector Review Guide
+description: Setup and test guide for reviewing the Remoet remote MCP connector. Test credentials, connection steps, and example prompts with expected behavior.
+---
+
+import Link from 'next/link'
+
+# Connector Review Guide
+
+This page is for reviewers evaluating the Remoet remote MCP connector. It covers what the connector does, how to connect, test credentials, and a set of prompts that exercise the core tools.
+
+## What Remoet is
+
+Remoet is an AI-agent-first career platform. Instead of browsing every job on the internet, a user stars companies they would actually work for, and their job feed comes from that shortlist only. The matching is driven by company-level tech-stack data. Through this connector, an agent can read and write the user's profile, search companies by tech stack, manage the user's starred shortlist, surface jobs from it, and track applications.
+
+## Connecting
+
+The connector lives at:
+
+```
+https://api.remoet.dev/mcp
+```
+
+Transport is Streamable HTTP. Two auth options:
+
+1. **OAuth 2.1** (custom connector flow in Claude) — PKCE + dynamic client registration are supported. Authorize at the URL above; the flow is automatic.
+2. **Bearer API key** — pass `Authorization: Bearer <key>` for direct testing.
+
+For review, use the test credentials below.
+
+## Test credentials
+
+A pre-populated test account is provided so every tool returns real data on the first call.
+
+```
+Email:    <FILL: reviewer@remoet.dev>
+Password: <FILL: provided separately, or use the API key below>
+API key:  <FILL: paste the generated key here>
+```
+
+The account already has a populated profile, a handful of starred companies, a saved job, and an application in progress, so `get_profile`, `get_starred_listings`, `get_starred_jobs`, `get_saved_jobs`, and `get_applications` all return content immediately.
+
+## Example prompts
+
+Each prompt below maps to a cluster of tools. Run them in order after connecting.
+
+### 1. Read the profile and shortlist
+
+> Show me my Remoet profile and the companies I've starred.
+
+**Expected:** the agent calls `get_profile` and `get_starred_listings`, then summarizes the user's skills, work history, and starred companies.
+
+### 2. Surface jobs from the shortlist
+
+> What jobs are open at my starred companies right now? Senior level, remote or hybrid.
+
+**Expected:** the agent calls `get_starred_jobs` with filters and returns a scoped list of jobs from starred companies only (not a global search). The job feed is intentionally limited to the shortlist.
+
+### 3. Discover and star a company by tech stack
+
+> Find companies that use TypeScript and PostgreSQL, then star one that looks like a good fit.
+
+**Expected:** the agent calls `search_listings` with a `techStack` array, presents matches, and calls `star_listing` after confirming with you. Write operations (starring, saving, applying) prompt for confirmation first.
+
+## Tool safety model
+
+- Read tools (`get_*`, `search_listings`) are annotated read-only.
+- Write tools are split by action: create (`create_*`, `star_listing`, `save_job`, `apply_to_job`), update (`update_*`), and destructive (`delete_*`, `unstar_listing`, `unsave_job`, `withdraw_application`).
+- Applications to external jobs are not submitted through the connector — most jobs are scraped from external careers pages, and the agent hands the user the URL. Only internal partner jobs support end-to-end application.
+- Tool results carry user-generated and third-party content; the server description instructs the agent to treat every field as untrusted data, not instructions.
+
+## Contact
+
+Questions during review: **carl.igelstrom@gmail.com**. See also the <Link href="/mcp">MCP server docs</Link> and <Link href="/get-started">Get Started</Link>.
