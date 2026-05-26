@@ -21,24 +21,23 @@ The connector lives at:
 https://api.remoet.dev/mcp
 ```
 
-Transport is Streamable HTTP. Two auth options:
+Transport is Streamable HTTP. Auth is **OAuth 2.1** (PKCE + dynamic client registration); a **Bearer API key** is also supported for direct testing.
 
-1. **OAuth 2.1** (custom connector flow in Claude) — PKCE + dynamic client registration are supported. Authorize at the URL above; the flow is automatic.
-2. **Bearer API key** — pass `Authorization: Bearer <key>` for direct testing.
+## Test access
 
-For review, use the test credentials below.
+Signup on Remoet is OAuth-only, so rather than hand you a password we provide a one-time magic-link sign-in for the reviewer account — nothing to manage:
 
-## Test credentials
+1. **Sign in.** Open this link (single-use, valid 30 days) to sign into the pre-populated reviewer account on remoet.dev:
 
-A pre-populated test account is provided so every tool returns real data on the first call.
+   ```
+   <FILL: magic-link URL — generate fresh at submission; valid 30 days>
+   ```
 
-```
-Email:    <FILL: reviewer@remoet.dev>
-Password: <FILL: provided separately, or use the API key below>
-API key:  <FILL: paste the generated key here>
-```
+2. **Connect Claude.** Add the connector URL above as a custom connector and click **Authorize**. Because you're already signed in, it's one click — no API key to copy.
 
-The account already has a populated profile, a handful of starred companies, a saved job, and an application in progress, so `get_profile`, `get_starred_listings`, `get_starred_jobs`, `get_saved_jobs`, and `get_applications` all return content immediately.
+3. **Bearer alternative.** If you'd rather use a token, generate an API key at `https://www.remoet.dev/api-keys` while signed in and pass `Authorization: Bearer <key>`.
+
+The account is pre-populated with a profile, several starred companies, and a live job feed from them, so `get_profile`, `get_starred_listings`, and `get_starred_jobs` return content on the first call. (`get_saved_jobs` and `get_applications` start empty — the read tools still work; save a job or apply to populate them.)
 
 ## Example prompts
 
@@ -61,6 +60,12 @@ Each prompt below maps to a cluster of tools. Run them in order after connecting
 > Find companies that use TypeScript and PostgreSQL, then star one that looks like a good fit.
 
 **Expected:** the agent calls `search_listings` with a `techStack` array, presents matches, and calls `star_listing` after confirming with you. Write operations (starring, saving, applying) prompt for confirmation first.
+
+### 4. Upgrade path (inline interactive card)
+
+> How do I upgrade to Pro?
+
+**Expected:** the agent calls `get_upgrade_link` and Claude renders an inline, branded upgrade card with a button that opens Stripe Checkout in the browser. Payment is never handled inside the connector — the card only links out. `get_upgrade_link` is environment-aware and exempt from the daily request cap. (This connector is interactive: it ships an MCP App UI resource for this card.)
 
 ## Tool safety model
 
