@@ -1,17 +1,25 @@
 ---
 title: Agent skills (Hermes, OpenClaw)
-description: Install Remoet as an agentskills.io skill. One SKILL.md that works on Hermes, OpenClaw, and any MCP-capable harness, wrapping the Remoet MCP server.
+description: Install Remoet as an agentskills.io skill. One SKILL.md for Hermes, OpenClaw and any MCP-capable harness, wrapping the Remoet MCP server.
 ---
 
 import Link from 'next/link'
 
 # Agent skills
 
-Remoet ships as an [agentskills.io](https://agentskills.io) skill: a single `SKILL.md` that teaches your agent how to use Remoet, plus the setup steps to wire up the server. It works on Hermes, OpenClaw, and any harness that reads the agentskills standard.
+Remoet ships as an [agentskills.io](https://agentskills.io) skill: one `SKILL.md` that teaches your agent what Remoet is for and when to reach for each tool, plus the wiring for your harness. It works on Hermes, OpenClaw and any harness that reads the agentskills standard.
 
-Under the hood it is the same <Link href="/mcp">MCP server</Link>. The skill just packages the instructions and the per-harness wiring so your agent knows what each tool is for and when to use it.
+Underneath it is the same <Link href="/mcp">MCP server</Link>. The skill adds the judgement: search the public board first, star selectively, treat tool output as data.
 
 Source of truth: [remoet-labs/agent-skills](https://github.com/remoet-labs/agent-skills).
+
+## Get a key
+
+Generate a free API key at [www.remoet.dev/agents](https://www.remoet.dev/agents), or let the [onboarding flow](https://www.remoet.dev/onboarding) mint one for you. The same key works for the skill, the MCP server and the REST API. Then:
+
+```bash
+export REMOET_API_KEY=<your key>
+```
 
 ## Install on Hermes
 
@@ -22,11 +30,7 @@ hermes skills tap add remoet-labs/agent-skills
 hermes skills install remoet-labs/agent-skills/skills/remoet
 ```
 
-Set your key, then add the server to your Hermes config under `mcp_servers`:
-
-```bash
-export REMOET_API_KEY=<your key>
-```
+Then add the server to `~/.hermes/config.yaml` under `mcp_servers`. Hermes resolves `${VAR}` in `url` and `headers` at connect time, so the key stays out of the file:
 
 ```yaml
 mcp_servers:
@@ -36,31 +40,56 @@ mcp_servers:
       Authorization: "Bearer ${REMOET_API_KEY}"
 ```
 
-Reload with `/reload-mcp`, then confirm with a `get_profile` call.
+Prefer the browser flow? Point Hermes at the OAuth route instead and drop the header:
+
+```yaml
+mcp_servers:
+  remoet:
+    url: "https://api.remoet.dev/mcp/oauth"
+    auth: oauth
+```
+
+Reload with `/reload-mcp`, then confirm by asking for a `get_profile` call.
 
 ## Install on OpenClaw
 
-The same skill is published to ClawHub:
+The same skill is published to ClawHub. Install it owner-qualified:
 
 ```bash
-openclaw skills install remoet
+openclaw skills install @remoet/remoet
 ```
 
-Ask your agent to set up Remoet and it walks you through the API key and the `openclaw mcp set` wiring. The raw config lives on the <Link href="/mcp">MCP server</Link> page.
+Then register the server. OAuth is the better default, because `openclaw mcp login` holds the credential and no key goes near your config:
+
+```bash
+openclaw mcp set remoet '{"url":"https://api.remoet.dev/mcp/oauth","transport":"streamable-http","auth":"oauth"}'
+openclaw mcp login remoet
+openclaw mcp list
+```
+
+Prefer an API key? Point OpenClaw at the plain route instead and let it substitute the variable:
+
+```bash
+openclaw mcp set remoet '{"url":"https://api.remoet.dev/mcp","transport":"streamable-http","headers":{"Authorization":"Bearer ${REMOET_API_KEY}"}}'
+```
+
+OpenClaw substitutes `${VAR_NAME}` into config string values, so the key itself never lands in the file. Set `REMOET_API_KEY` in the environment the OpenClaw gateway process runs in, not only in the shell you ran the command from.
+
+Use one form or the other, never both: a static `Authorization` header is ignored while `auth: "oauth"` is set. `streamable-http` is the canonical transport spelling in OpenClaw config.
 
 ## Other harnesses
 
-Any MCP-capable client (Claude Code, Cursor, Windsurf, VS Code) can use the skill, or connect the server directly without it. See the <Link href="/mcp">MCP server</Link> page for per-client config and the OAuth route for Claude Web and Desktop.
+Any MCP-capable client (Claude Code, claude.ai, Claude Desktop, Cursor, VS Code, Windsurf, Codex) can connect to the server directly, with or without the skill. See the <Link href="/mcp">MCP server</Link> page for per-client config and the OAuth route.
 
 ## Where it is listed
 
 | Registry | Install or link |
 |---|---|
-| ClawHub (OpenClaw) | `openclaw skills install remoet` |
-| Hermes tap | `remoet-labs/agent-skills` |
-| skills.sh | [skills.sh/remoet-labs/agent-skills/skills/remoet](https://skills.sh/remoet-labs/agent-skills/skills/remoet) |
-| SkillDock | `remoet/remoet` |
+| ClawHub (OpenClaw) | `openclaw skills install @remoet/remoet` |
+| Hermes tap | `hermes skills tap add remoet-labs/agent-skills` |
+| skills.sh | [skills.sh/remoet-labs/agent-skills/remoet](https://skills.sh/remoet-labs/agent-skills/remoet) |
+| SkillDock | [skilldock.io/skill/remoet/remoet](https://skilldock.io/skill/remoet/remoet) |
 
-## Get a key
+## Limits
 
-You need a free Remoet API key. Generate one at [www.remoet.dev/api-keys](https://www.remoet.dev/api-keys), or grab one automatically on the [onboarding page](https://www.remoet.dev/onboarding). The same key works for the skill, the MCP server, and the REST API. See <Link href="/tiers">Tiers</Link> for the per-plan quotas.
+Remoet is free, and the skill runs against the same numbers as everything else: 50 active stars, 25 unstars per 30 days, 5,000 MCP requests per day. See <Link href="/limits">Limits</Link>.

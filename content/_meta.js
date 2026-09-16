@@ -2,7 +2,7 @@ export default {
   index: 'Introduction',
   'get-started': 'Get Started',
   mcp: 'MCP server',
-  tiers: 'Tiers',
+  limits: 'Limits',
   errors: 'Errors',
   'starter-template': 'Starter Template',
   about: {

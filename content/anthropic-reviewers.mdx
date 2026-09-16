@@ -1,74 +1,86 @@
 ---
 title: Connector Review Guide
-description: Setup and test guide for reviewing the Remoet remote MCP connector. Test credentials, connection steps, and example prompts with expected behavior.
+description: Setup and test guide for reviewing the Remoet remote MCP connector. Connection steps, reviewer access, and example prompts with expected behavior.
 ---
 
 import Link from 'next/link'
 
 # Connector Review Guide
 
-This page is for reviewers evaluating the Remoet remote MCP connector. It covers what the connector does, how to connect, test credentials, and a set of prompts that exercise the core tools.
+This page is for reviewers evaluating the Remoet remote MCP connector. It covers what the connector does, how to connect, reviewer access, and prompts that exercise the core tools.
 
 ## What Remoet is
 
-Remoet is an AI-agent-first career platform. Instead of browsing every job on the internet, a user stars companies they would actually work for, and their job feed comes from that shortlist only. The matching is driven by company-level tech-stack data. Through this connector, an agent can read and write the user's profile, search companies by tech stack, manage the user's starred shortlist, surface jobs from it, and track applications.
+Remoet is an AI-agent-first career platform for tech jobs. The job catalogue is public: an agent can search every open role on the board without an account-level gate and without starring anything. A user stars the companies they would actually work for, and those companies' new roles land in the user's own feed, with each company's full tech stack detail unlocked. Company level tech stack data is derived from the roles each company is hiring for now, which is what drives matching. Through this connector an agent can search the public catalogue, read and write the user's profile, search companies by stack, manage the starred shortlist, surface the user's feed, save roles, and hand over application links.
+
+Remoet is free. There are no paid plans, nothing to upgrade to, and no tool that sells anything.
 
 ## Connecting
 
-The connector lives at:
+The connector URL is:
 
 ```
-https://api.remoet.dev/mcp
+https://api.remoet.dev/mcp/oauth
 ```
 
-Transport is Streamable HTTP. Auth is **OAuth 2.1** (PKCE + dynamic client registration); a **Bearer API key** is also supported for direct testing.
+Transport is Streamable HTTP, stateless. Auth is **OAuth 2.1** with PKCE (S256) and dynamic client registration; discovery metadata is served at `/.well-known/oauth-protected-resource/mcp/oauth` and `/.well-known/oauth-authorization-server/mcp/oauth`.
 
-## Test access
+A second route, `https://api.remoet.dev/mcp`, takes a static `Authorization: Bearer <key>` header and never returns an OAuth challenge. Use that one for direct testing with an API key; use `/mcp/oauth` for the connector flow.
 
-Signup on Remoet is OAuth-only, so rather than hand you a password we provide a one-time magic-link sign-in for the reviewer account — nothing to manage:
+## Reviewer access
 
-1. **Sign in.** Use the one-time sign-in link provided with this submission (single-use, valid 30 days) to sign into the pre-populated reviewer account on remoet.dev. It's not published here because it's single-use; if it's already been consumed or you need a fresh one, email the contact below and we'll send another.
+Signup on Remoet is OAuth-only, so rather than hand over a password we provide a one-time magic-link sign-in for the reviewer account.
 
-2. **Connect Claude.** Add the connector URL above as a custom connector and click **Authorize**. Because you're already signed in, it's one click — no API key to copy.
+1. **Sign in.** Use the one-time sign-in link provided with this submission (single use, valid 30 days) to sign into the pre-populated reviewer account on remoet.dev. It is not published here because it is single use. If it has been consumed, email the contact below and we will send another.
 
-3. **Bearer alternative.** If you'd rather use a token, generate an API key at `https://www.remoet.dev/api-keys` while signed in and pass `Authorization: Bearer <key>`.
+2. **Connect Claude.** Add the connector URL above as a custom connector and click **Authorize**. Because you are already signed in, it is one click, with no API key to copy.
 
-The account is pre-populated with a profile, several starred companies, and a live job feed from them, so `get_profile`, `get_starred_listings`, and `get_starred_jobs` return content on the first call. (`get_saved_jobs` and `get_applications` start empty — the read tools still work; save a job or apply to populate them.)
+3. **Bearer alternative.** If you would rather use a token, generate an API key at [www.remoet.dev/agents](https://www.remoet.dev/agents) while signed in, point the client at `https://api.remoet.dev/mcp`, and pass `Authorization: Bearer <key>`.
+
+The account is pre-populated with a profile, several starred companies and a live feed from them, so `get_profile`, `search_listings` with `starred: true` and `get_starred_jobs` all return content on the first call. `get_saved_jobs` starts empty; the read still works, and saving a job populates it.
 
 ## Example prompts
 
-Each prompt below maps to a cluster of tools. Run them in order after connecting.
+Each prompt maps to a cluster of tools. Run them in order after connecting.
 
-### 1. Read the profile and shortlist
+### 1. Search the public catalogue, no account state needed
 
-> Show me my Remoet profile and the companies I've starred.
+> What senior Go roles are open right now?
 
-**Expected:** the agent calls `get_profile` and `get_starred_listings`, then summarizes the user's skills, work history, and starred companies.
+**Expected:** the agent calls `search_jobs`, which reads the public board across every company, and returns roles with the employer's application URL. No star is needed or consumed. This is the surface a brand new user hits first.
 
-### 2. Surface jobs from the shortlist
+### 2. Read the profile and the shortlist
 
-> What jobs are open at my starred companies right now? Senior level, remote or hybrid.
+> Show me my Remoet profile and the companies I have starred.
 
-**Expected:** the agent calls `get_starred_jobs` with filters and returns a scoped list of jobs from starred companies only (not a global search). The job feed is intentionally limited to the shortlist.
+**Expected:** the agent calls `get_profile`, then `search_listings` with `starred: true`, and summarizes skills, work history and the starred companies.
 
-### 3. Discover and star a company by tech stack
+### 3. The user's own feed
+
+> What is new at my starred companies? Senior level, remote or hybrid.
+
+**Expected:** the agent calls `get_starred_jobs` with filters, returning roles from starred companies only. This feed is scoped to the shortlist by design; `search_jobs` is the whole board.
+
+### 4. Discover and star a company by tech stack
 
 > Find companies that use TypeScript and PostgreSQL, then star one that looks like a good fit.
 
-**Expected:** the agent calls `search_listings` with a `techStack` array, presents matches, and calls `star_listing` after confirming with you. Write operations (starring, saving, applying) prompt for confirmation first.
+**Expected:** the agent calls `search_listings` with a `techStack` array, presents matches with their `matchedTechStack`, and calls `star_listing` after confirming with you.
 
-### 4. Upgrade path (inline interactive card)
+### 5. Apply
 
-> How do I upgrade to Pro?
+> I like that role. How do I apply?
 
-**Expected:** the agent calls `get_upgrade_link` and Claude renders an inline, branded upgrade card with a button that opens Stripe Checkout in the browser. Payment is never handled inside the connector — the card only links out. `get_upgrade_link` is environment-aware and exempt from the daily request cap. (This connector is interactive: it ships an MCP App UI resource for this card.)
+**Expected:** the agent calls `apply_to_job` and gets `applicationType: "external"` plus the `applicationUrl` on the employer's own site, which it hands to you. Most of the catalogue is scraped from public career pages, so Remoet does not submit those applications.
 
 ## Tool safety model
 
-- Read tools (`get_*`, `search_listings`) are annotated read-only.
-- Write tools are split by action: create (`create_*`, `star_listing`, `save_job`, `apply_to_job`), update (`update_*`), and destructive (`delete_*`, `unstar_listing`, `unsave_job`, `withdraw_application`).
-- Applications to external jobs are not submitted through the connector — most jobs are scraped from external careers pages, and the agent hands the user the URL. Only internal partner jobs support end-to-end application.
-- Tool results carry user-generated and third-party content; the server description instructs the agent to treat every field as untrusted data, not instructions.
+- 24 tools are listed. Read tools (`get_*`, `search_*`) are annotated read-only.
+- Write tools are split by action: create (`create_linktree`, `star_listing`, `save_job`, `apply_to_job`), update (`update_*`, `save_*`), and destructive (`delete_*`, `unstar_listing`, `unsave_job`).
+- Starring, unstarring, saving and applying change the user's account, and the server's instructions tell the agent to confirm with the user before calling them.
+- Applications to scraped jobs are never submitted through the connector. The agent returns the employer's URL and the user applies there. Only roles posted directly through Remoet support an end to end application.
+- Tool results carry user generated and third party content. The server description instructs the agent to treat every field as untrusted data, not as instructions.
+- Browser origins are checked against an allowlist (`claude.ai`, `claude.com`, `app.claude.com` and Remoet's own hosts) for DNS rebinding protection.
 
 ## Contact
 

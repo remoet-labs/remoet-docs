@@ -1,6 +1,6 @@
 ---
 title: GET /user/education
-description: Returns the education entries on your remoet.dev profile — degrees, bootcamps, online programs. Sorted by current first then by start-date descending.
+description: Returns the education entries on your Remoet profile, covering degrees, bootcamps and online programs. Sorted by current first then by start-date descending.
 ---
 
 import Link from 'next/link'
@@ -11,15 +11,15 @@ Returns all education entries from your profile, sorted with current first, then
 
 ## How it works
 
-Education entries let you document your academic background — degrees, bootcamps, online programs, or any other institution. Each entry has:
+Education entries let you document your academic background: degrees, bootcamps, online programs, or any other institution. Each entry has:
 
-- **institution** — the name of the school, university, or program
-- **institutionUrl** — optional link to the institution's website
-- **studyLevel** — the type of degree or program (see values below)
-- **fieldOfStudy** — e.g. "Computer Science", "Design"
-- **startDate / endDate** — the date range of the program
-- **isCurrent** — set to `true` if you're currently enrolled (omits `endDate`)
-- **description** — optional notes, achievements, thesis topic, etc.
+- **institution**: the name of the school, university, or program
+- **institutionUrl**: optional link to the institution's website
+- **studyLevel**: the type of degree or program (see values below)
+- **fieldOfStudy**: e.g. "Computer Science", "Design"
+- **startDate / endDate**: the date range of the program
+- **isCurrent**: set to `true` if you're currently enrolled (omits `endDate`)
+- **description**: optional notes, achievements, thesis topic, etc.
 
 ### Study Level Values
 
@@ -108,6 +108,6 @@ class PublicUserEducationDto {
 
 ## See also
 
-- <Link href="/full">`/user/full`</Link> — same education plus the rest of your profile
+- <Link href="/full">`/user/full`</Link>, the same education plus the rest of your profile
 - <Link href="/get-started/authorization">Authorization</Link>
 - [Errors](/errors)

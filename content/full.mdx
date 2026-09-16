@@ -1,15 +1,15 @@
 ---
 title: GET /user/full
-description: Returns everything on your profile in one shot — base account, profile fields with visibility flags, jobs, projects, link trees, and education.
+description: Returns everything on your profile in one shot, including base account, profile fields with visibility flags, jobs, projects, link trees and education.
 ---
 
 import Link from 'next/link'
 
 # `GET /user/full`
 
-Returns everything on your remoet.dev profile in a single response. Useful for hydrating an external portfolio site with one request.
+Returns everything on your Remoet profile in a single response. Useful for hydrating an external portfolio site with one request.
 
-Unlike <Link href="/links">`/user/links`</Link> (which scrubs fields you've marked private), this endpoint **preserves the per-field visibility flags** so the caller can decide what to render. Treat the response as private data — your key is the only thing standing between it and the open web.
+Unlike <Link href="/links">`/user/links`</Link> (which scrubs fields you've marked private), this endpoint **preserves the per-field visibility flags** so the caller can decide what to render. Treat the response as private data. Your key is the only thing standing between it and the open web.
 
 ## Basic information
 
@@ -130,7 +130,7 @@ const me = await res.json();
 
 ### Field notes
 
-- `profile.*` fields wrapped as `{ isPublic, value }` are **DataField** objects. The visibility flag is currently informational — your client gets the value either way and decides what to render.
+- `profile.*` fields wrapped as `{ isPublic, value }` are **DataField** objects. The visibility flag is currently informational: your client gets the value either way and decides what to render.
 - `jobs[].userId` is your own MongoDB id; `jobs[].listingId` references the listing (company) the role is at. Use the listing id for further lookups via the MCP server if the agent needs more context.
 - `linkTrees[].links[]` returns `{ id, label, url }` only. View and click counts are server-side and not exposed.
 

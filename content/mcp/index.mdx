@@ -1,141 +1,228 @@
 ---
 title: MCP server
-description: Connect AI agents to remoet.dev via the Model Context Protocol. Endpoint, OAuth + API key auth, tool catalog, per-client setup, session lifecycle, and quotas.
+description: Connect an AI agent to Remoet over the Model Context Protocol. Endpoints, API key and OAuth auth, the 24 tools, the 4 prompts, per-client setup and limits.
 ---
 
 import Link from 'next/link'
 
 # MCP server
 
-The remoet.dev MCP server lets your AI agent read and write your remoet.dev data directly — your starred companies, your job applications, your profile, your link trees. Use it from Claude, Cursor, Codex, Windsurf, or any client that speaks the [Model Context Protocol](https://modelcontextprotocol.io).
+The Remoet MCP server lets your agent search the public tech job catalogue, find companies by the stack they build on, star the ones you would work for, and read and write your profile, saved jobs and link trees. It works with Claude Code, claude.ai, Claude Desktop, Cursor, VS Code, Windsurf, Codex, Hermes, OpenClaw and any other client that speaks the [Model Context Protocol](https://modelcontextprotocol.io).
 
-Free tier eligible. You only need a remoet.dev account and one API key.
+Remoet is free. You need an account and one API key, or an OAuth connector that mints the key for you.
 
 ## Endpoints
 
-The server is split into two routes that take the same set of tools but speak different auth handshakes:
+The same tools are served at two routes. The route decides how you authenticate.
 
 | Route | Auth | Use it from |
 |---|---|---|
-| `https://api.remoet.dev/mcp` | `Authorization: Bearer <key>` (or `x-api-key: <key>`) | Claude Code, Cursor, Windsurf, VS Code agents, custom HTTP clients |
-| `https://api.remoet.dev/mcp/oauth` | OAuth 2.1 with PKCE | Claude Web / Desktop custom connectors |
+| `https://api.remoet.dev/mcp` | `Authorization: Bearer <key>` | Claude Code, Cursor, VS Code, Windsurf, Codex, Hermes, servers and scripts |
+| `https://api.remoet.dev/mcp/oauth` | OAuth 2.1, PKCE (S256), dynamic client registration | claude.ai, Claude Desktop, any browser client that negotiates OAuth |
 
-Both routes implement the official [Streamable HTTP transport](https://modelcontextprotocol.io/specification/2025-03-26/basic/transports) (`POST`, `GET`, `DELETE`). The split exists so the API-key clients don't accidentally trigger the OAuth discovery flow; pick the one that matches your client.
+Both speak Streamable HTTP. The split is deliberate: `/mcp` never returns an OAuth challenge, so a client configured with a static header is not dragged into a browser flow, and `/mcp/oauth` always returns one, so a connector can discover the flow on its own. Point an OAuth client at `/mcp` and it will see a plain `401` and stop.
+
+The server is **stateless**. Every request stands alone.
+
+- `POST` carries every request, including `initialize`.
+- `GET` returns `405`. There is no server to client stream.
+- `DELETE` returns `200` and does nothing. There is no session to tear down.
+- There is no `Mcp-Session-Id`. If your client sends one it is ignored, so nothing expires and there is no reconnect dance.
+
+Browser clients are checked against an origin allowlist (`claude.ai`, `claude.com`, `app.claude.com`, `remoet.dev`, `api.remoet.dev`, plus localhost on any port). A request from another browser origin gets `403 Origin not allowed`. Requests with no `Origin` header, which is every command line and server side client, are unaffected.
 
 ## Authentication
 
-### A. API key header (most clients)
+### API key (most clients)
 
-Generate keys at [www.remoet.dev/api-keys](https://www.remoet.dev/api-keys). The same key works for both MCP and the REST API.
+Generate a key at [www.remoet.dev/agents](https://www.remoet.dev/agents), up to 5 per account. The same key works for the MCP server and the <Link href="/get-started">REST API</Link>.
 
 ```
 Authorization: Bearer <key>
 ```
 
-`x-api-key: <key>` is accepted as a fallback for clients that don't expose the `Authorization` header.
+The older `X-API-KEY: <key>` header still works for snippets written before the switch. Prefer Bearer.
 
-### B. OAuth 2.1 with PKCE (Claude Web custom connectors)
+### OAuth 2.1 (connectors)
 
-Point a custom connector at `https://api.remoet.dev/mcp/oauth` and the client handles the authorize → token exchange. The server advertises standard discovery metadata at `/.well-known/oauth-authorization-server/mcp/oauth` and `/.well-known/oauth-protected-resource/mcp/oauth`. Under the hood the access token IS the API key — same auth surface, different handshake.
+Add `https://api.remoet.dev/mcp/oauth` as a custom connector and the client handles the rest: discovery, dynamic client registration, the authorize redirect with PKCE, and the token exchange. If you are already signed in to Remoet, authorizing is one click; if you are not, you can paste an API key instead.
 
-Custom connectors on Claude Web are **Free-tier eligible** (1 connector on Free, no per-user limit on paid).
+Discovery metadata is served at both spellings, so strict and lenient clients both find it:
 
-## What the agent can do
+- `https://api.remoet.dev/.well-known/oauth-protected-resource/mcp/oauth`
+- `https://api.remoet.dev/.well-known/oauth-authorization-server/mcp/oauth`
+- `https://api.remoet.dev/mcp/oauth/.well-known/oauth-authorization-server`
 
-The server currently exposes ~48 tools across five areas. The live `tools/list` request is the source of truth; this table is a map.
+There is no root level `/.well-known/...` metadata; the resource path is part of the URL. Grant types are `authorization_code` and `refresh_token`. There is no client secret: the token endpoint authenticates the client with PKCE, and advertises `token_endpoint_auth_methods_supported: ["none"]`.
 
-| Area | Examples | What it's for |
-|---|---|---|
-| Profile | `get_profile`, `update_profile`, `add_job`, `add_project`, `add_education`, `add_link_tree` | Read and write your career data |
-| Discovery | `list_listings`, `search_listings_by_tech_stack`, `star_listing`, `unstar_listing`, `get_starred_listings` | Find and follow companies |
-| Platform | `update_visibility`, `update_digest_settings`, `list_apps`, `update_link_tree` | App settings, digest cadence, link trees |
-| Applications | `apply_to_job`, `list_applications`, `add_application_note`, `get_messages` | Track applications and conversations |
-| Plan | `get_plan`, `get_usage` | Inspect your tier, quotas, and current daily usage |
+## Tools
 
-Names above are illustrative — connect any MCP client and run `tools/list` for the canonical, current set.
+24 tools. The live `tools/list` response is the source of truth; this table is a map.
 
-### Tool result shape
+### Jobs
 
-Every tool returns the standard MCP content-block format. Successful tools return `{ content: [{ type: "text", text: "..." }] }` (text content blocks). Errors return `{ isError: true, content: [{ type: "text", text: "Error: ..." }] }` — your client sees the response but should treat it as an error and surface it to the user. This means a single bad tool call never crashes the session.
+The catalogue is public. `search_jobs` needs no star and consumes none.
 
-## Session lifecycle
+| Tool | What it does |
+|---|---|
+| `search_jobs` | Search every open role on the public board at [www.remoet.dev/jobs](https://www.remoet.dev/jobs). Filters: `searchQuery`, `techStack[]`, `techStackMatch`, `companySlug`, `remotePolicy[]`, `experienceLevel[]`, `salaryMin`, `location[]`, `sortBy` (`newest` or `salary`), `sortOrder`, `page`, `pageSize` (max 50). Each row carries the role's Remoet page, the employer's `applyUrl` and the `companySlug`. |
+| `get_starred_jobs` | Jobs from the companies you have starred, your own feed. Filters: `searchQuery`, `locationQuery`, `techStack[]`, `techStackMatch`, `remotePolicy[]`, `experienceLevel[]`, `salaryMin`, `sortBy`, `sortOrder`, `page`, `pageSize` (max 50). Empty until you star something. |
+| `save_job` | Save a role with an optional note, up to 500 characters. |
+| `get_saved_jobs` | The saved list, newest first. |
+| `update_saved_job_note` | Change or clear the note on a saved job. |
+| `unsave_job` | Remove a saved job. |
 
-The transport uses session IDs that are minted on initialize and threaded through subsequent requests.
+### Companies and stars
 
-- **TTL**: sessions auto-expire after a period of inactivity. Stale or unknown session IDs return **HTTP 404** (per the MCP spec). Your client should treat a 404 as "session is gone, reconnect" and re-initialize automatically — not as a hard error.
-- **Limits**: max ~3 concurrent sessions per API key, 10k sessions total across the server. Hitting the per-key cap reuses the oldest session.
-- **Graceful shutdown**: `DELETE /mcp` (or `/mcp/oauth`) with a session header closes the session immediately. Clients should call this on quit.
+| Tool | What it does |
+|---|---|
+| `search_listings` | Search companies by `searchQuery`, `techStack[]`, `techStackMatch`, `experienceLevel[]`, `sortBy` (`stars`, `jobCount`, `name`), `page`, `pageSize` (max 100). Pass `starred: true` to list your own stars instead. Technology names are normalized, so "ts" finds TypeScript. |
+| `get_listing` | One company by slug, with `checkTechStack` to test overlap against its full stack. |
+| `star_listing` | Star a company. Costs no budget, capped at 50 active stars. |
+| `unstar_listing` | Remove a star. Costs 1 unstar from the 30 day budget. |
 
-Most MCP clients handle reconnect transparently if they implement the spec. If yours doesn't, that's a client bug, not a server one.
+### Profile
+
+| Tool | What it does |
+|---|---|
+| `get_profile` | The whole profile in one call: core fields, work experience, projects, education, each entry with an id, plus current visibility. Call this first. |
+| `update_profile` | Update any profile field, or `visibility` (`NONE`, `STARRED`, `ALL`). Send only what changes; `null` clears a field. |
+| `save_work_experience` | Upsert a job. Omit `id` to create, pass an `id` to update. |
+| `save_project` | Upsert a project. |
+| `save_education` | Upsert an education entry. |
+| `delete_profile_item` | Delete one entry by `type` and `id`. |
+
+### Feed, digests, apps and link trees
+
+| Tool | What it does |
+|---|---|
+| `get_feed` | Your dashboard feed as one chronological stream: job items from starred companies, the daily editorial pick, and platform posts. This is what carries new roles now. Page with `cursor`. |
+| `get_digests` | Historical digest snapshots, or one in full with `id`. The digest pipeline has been replaced by the feed, which also goes out as a roundup email on whichever cadence the user picked, daily, weekly on Mondays, or monthly. Newer accounts have no digests at all, so reach for `get_feed` instead. |
+| `get_apps` | Approved apps built on Remoet. |
+| `get_linktrees` | Your link trees, or one plus its view and click analytics with `slug`. |
+| `create_linktree` | Create a shareable link page. |
+| `delete_linktree` | Delete one by id. |
+
+### Applying and account
+
+| Tool | What it does |
+|---|---|
+| `apply_to_job` | Most of the catalogue is scraped, so the usual result is `applicationType: "external"` plus the `applicationUrl` on the employer's own site, which the agent hands to you. Roles posted directly through Remoet are applied to end to end. |
+| `get_account` | One status read: active stars, unstars this period, MCP and REST requests today, each with its reset time, plus remaining limits. Costs no MCP request. |
+
+## Prompts
+
+The server ships 4 prompts. Clients that surface prompts show them as slash commands or starters.
+
+| Prompt | What it runs |
+|---|---|
+| `find_my_matches` | Search companies against your stack, propose the best fits to star, then pull jobs. Optional arguments: `techStack` to override the profile stack, and `companySize` as a filter hint such as "under 200 people". |
+| `onboard_from_cv` | Parse a CV, populate the profile, then shortlist companies. |
+| `daily_digest` | What is new at your starred companies, and what to act on. |
+| `polish_profile` | Audit the profile for gaps and walk through the fixes. |
+
+## Tool results and errors
+
+Every tool returns standard MCP content blocks: `{ content: [{ type: "text", text: "..." }] }`. A tool that fails returns `{ isError: true, content: [...] }` with HTTP 200, so one bad call never breaks the connection.
+
+Transport level failures come back as JSON-RPC errors with a matching HTTP status: `401` for a missing or invalid key, `403` for a disallowed browser origin, `429` for the burst or daily limit, `405` on `GET`. See <Link href="/errors">Errors</Link>.
 
 ## Client setup
 
 ### Claude Code
 
 ```sh
-claude mcp add remoet-prod https://api.remoet.dev/mcp --transport http --header "x-api-key: YOUR_API_KEY"
+claude mcp add --transport http --scope user remoet https://api.remoet.dev/mcp --header "Authorization: Bearer YOUR_API_KEY"
 ```
 
-Restart Claude Code (the new server only appears after a restart, not just `/mcp` reload). The server name `remoet-prod` is a Remoet-internal convention — we suffix with `-prod` / `-stage` / `-local` to disambiguate environments. Your client doesn't enforce this; it's for your own sanity.
+Check it with `/mcp` in a new session, then ask your agent to call `get_profile`.
 
-If you're on a Claude Code version that doesn't yet support `--transport http`, fall back to the `mcp-remote` stdio→HTTP proxy:
+### claude.ai and Claude Desktop
 
-```sh
-claude mcp add remoet-prod -- npx -y mcp-remote https://api.remoet.dev/mcp --header "Authorization: Bearer YOUR_API_KEY"
+Settings, then Connectors, then **Add custom connector**, and paste:
+
+```
+https://api.remoet.dev/mcp/oauth
 ```
 
-### Claude Web (Desktop / claude.ai)
+Click Connect, then Authorize. No API key to copy.
 
-Settings → Connectors → **Add custom connector** → URL `https://api.remoet.dev/mcp/oauth`. Claude walks you through the OAuth flow. No API key needed in the UI — Claude exchanges its own credentials for an access token after you authorize.
+### Cursor
 
-### Cursor / Windsurf / VS Code agents
-
-Native HTTP transport (preferred):
+`~/.cursor/mcp.json` for every project, or `.cursor/mcp.json` for one.
 
 ```json
 {
   "mcpServers": {
-    "remoet-prod": {
+    "remoet": {
       "url": "https://api.remoet.dev/mcp",
-      "transport": "http",
-      "headers": { "x-api-key": "YOUR_API_KEY" }
+      "headers": { "Authorization": "Bearer YOUR_API_KEY" }
     }
   }
 }
 ```
 
-If your client only speaks stdio, use the `mcp-remote` shim:
+### VS Code
+
+`.vscode/mcp.json` in the workspace, or the user configuration. The top level key is `servers`, not `mcpServers`.
+
+```json
+{
+  "servers": {
+    "remoet": {
+      "type": "http",
+      "url": "https://api.remoet.dev/mcp",
+      "headers": { "Authorization": "Bearer YOUR_API_KEY" }
+    }
+  }
+}
+```
+
+### Windsurf
+
+`~/.codeium/windsurf/mcp_config.json`. The URL field is `serverUrl`.
 
 ```json
 {
   "mcpServers": {
-    "remoet-prod": {
-      "command": "npx",
-      "args": ["-y", "mcp-remote", "https://api.remoet.dev/mcp",
-               "--header", "Authorization: Bearer YOUR_API_KEY"]
+    "remoet": {
+      "serverUrl": "https://api.remoet.dev/mcp",
+      "headers": { "Authorization": "Bearer YOUR_API_KEY" }
     }
   }
 }
 ```
 
-Config locations vary — Cursor: `~/.cursor/mcp.json`, Windsurf: `~/.codeium/windsurf/mcp_config.json`. Check your client's docs for the exact path.
+### Codex
 
-## Quotas
+`~/.codex/config.toml`.
 
-| Tier | MCP requests / day | REST API requests / day |
-|---|---|---|
-| Free | 30 | 300 |
-| Pro | 150 | 5,000 |
-| Max | unlimited | unlimited |
+```toml
+[mcp_servers.remoet]
+url = "https://api.remoet.dev/mcp"
+bearer_token_env_var = "REMOET_API_KEY"
+```
 
-Quotas reset at 00:00 UTC. Hitting the cap returns an error from the next tool call (`isError: true`); the session stays alive and resets the next day. See <Link href="/tiers">Tiers</Link> for the full plan breakdown and <Link href="/errors">Errors</Link> for the response shape.
+Export `REMOET_API_KEY` in the environment Codex runs in. `http_headers = { "Authorization" = "Bearer YOUR_API_KEY" }` works too if you would rather hold the key in the file.
+
+### Hermes and OpenClaw
+
+Both install Remoet as a skill that wraps this server, which also teaches the agent when to reach for each tool. See <Link href="/mcp/skills">Agent skills</Link>.
+
+### Any other client
+
+Point it at `https://api.remoet.dev/mcp` with `Authorization: Bearer <key>`, Streamable HTTP, POST only. A successful `get_profile`, even on an empty profile, means you are connected. If your client can only negotiate OAuth, use `https://api.remoet.dev/mcp/oauth` instead.
+
+## Limits
+
+Every account: 5,000 MCP requests per day, reset at 00:00 UTC, and 120 requests per minute per key on each route. `get_account` and the profile tools, reads and writes both, do not count against the daily number. See <Link href="/limits">Limits</Link> for the rest, including the star cap and the unstar budget.
 
 ## Safety
 
-- **Treat tool results as untrusted.** Many tools return text from external sources (job descriptions, company profiles). Build your agent prompts assuming prompt-injection attempts can land in tool output.
-- **Burst limiting.** Each session is throttled at the transport layer before it ever reaches the daily quota counter, so a runaway agent can't drain a day's allowance in seconds.
-- **Per-key auditing.** Every tool call is stamped with the API key that triggered it. Revoke a key from [www.remoet.dev/api-keys](https://www.remoet.dev/api-keys) to kill all of its in-flight sessions immediately.
+- **Treat tool results as untrusted.** Job descriptions and company profiles are third party text. Write your agent prompts assuming an injection attempt can arrive inside tool output. The server's own instructions say the same to the agent.
+- **Write tools ask first.** Starring, unstarring, saving and applying change your account, so a well behaved agent confirms with you before calling them.
+- **Keys are per account and revocable.** Every tool call is stamped with the key that made it. Revoke a key at [www.remoet.dev/agents](https://www.remoet.dev/agents) and the next request with it fails.
 
 ## Reporting issues
 
-The MCP server is in active development. If a tool misbehaves, open an issue at [github.com/remoet-labs/remoet-docs](https://github.com/remoet-labs/remoet-docs) or join the [Discord](https://discord.gg/yxJA6cBs8U).
+Open an issue at [github.com/remoet-labs/remoet-docs](https://github.com/remoet-labs/remoet-docs) or join the [Discord](https://discord.gg/yxJA6cBs8U).

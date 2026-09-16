@@ -1,6 +1,6 @@
 ---
 title: Get Started
-description: Sign up, generate an API key, then plug it into either the MCP server (for AI agents) or the REST API (for your own code).
+description: Sign up, generate an API key, then plug it into the MCP server for AI agents or the REST API for your own code.
 ---
 
 import Link from 'next/link'
@@ -9,42 +9,34 @@ import Link from 'next/link'
 
 ## Sign up
 
-Create a developer profile at [www.remoet.dev](https://www.remoet.dev). You can sign in with GitHub or Google.
+Create a profile at [www.remoet.dev](https://www.remoet.dev). You can sign in with GitHub or Google. Remoet is free.
 
 ## Generate an API key
 
-Once signed in, head to [www.remoet.dev/api-keys](https://www.remoet.dev/api-keys). You can hold up to **5 keys per account** at any time. Each key works against both the MCP server and the REST API.
+Once signed in, go to [www.remoet.dev/agents](https://www.remoet.dev/agents). You can hold up to **5 keys per account**. Each key works against both the MCP server and the REST API.
 
-Daily request limits apply per account (not per key):
+**Keys expire 365 days after they are created.** An expired key returns `401` with `"message": "API Key Expired"`, so a long-running integration will stop a year after you set it up unless you rotate it. Mint the replacement before you delete the old one, swap it in, then revoke. Connectors on the OAuth route hold a key of their own and are expired by the same clock, so reconnect them the same way.
 
-| Tier | REST API requests / day | MCP requests / day |
-|---|---|---|
-| Free | 300 | 30 |
-| Pro | 5,000 | 150 |
-| Max | unlimited | unlimited |
-
-Limits reset daily UTC. See <Link href="/tiers">Tiers</Link> for the full plan breakdown.
+Daily request limits are counted per account, not per key: **5,000 MCP requests and 5,000 REST requests per day**, reset at 00:00 UTC. They are an abuse threshold rather than a product gate. See <Link href="/limits">Limits</Link>.
 
 ## Use your key
 
-Two ways to plug in:
-
 ### A. MCP server (for AI agents)
 
-If you're connecting an AI agent — Claude, Cursor, Codex, Windsurf — see <Link href="/mcp">MCP</Link> for the install URL and per-client setup. This is the recommended path for agentic workflows.
+Connecting Claude Code, claude.ai, Claude Desktop, Cursor, VS Code, Windsurf, Codex, Hermes or OpenClaw? See <Link href="/mcp">MCP server</Link> for the endpoints and per-client setup, and <Link href="/mcp/skills">Agent skills</Link> for the packaged Hermes and OpenClaw install. This is the recommended path for agent workflows.
 
 ### B. REST API (for your own code)
 
-If you're building a portfolio site or pulling data into your own tooling, the REST API is what you want. Set the `Authorization: Bearer <Your key>` header on any of the endpoints below.
+Building a portfolio site or pulling your data into your own tooling? Set `Authorization: Bearer <Your key>` on any endpoint below.
 
 #### Endpoints
 
-- <Link href="/hello">`GET /user/hello`</Link> — health check
-- <Link href="/full">`GET /user/full`</Link> — everything in one shot
-- <Link href="/links">`GET /user/links`</Link> — social links
-- <Link href="/jobs">`GET /user/jobs`</Link> — work history
-- <Link href="/projects">`GET /user/projects`</Link> — project cards
-- <Link href="/education">`GET /user/education`</Link> — education entries
-- <Link href="/linktrees">`GET /user/linktrees`</Link> — your link trees
+- <Link href="/hello">`GET /user/hello`</Link>, health check
+- <Link href="/full">`GET /user/full`</Link>, everything in one shot
+- <Link href="/links">`GET /user/links`</Link>, social links
+- <Link href="/jobs">`GET /user/jobs`</Link>, work history
+- <Link href="/projects">`GET /user/projects`</Link>, project cards
+- <Link href="/education">`GET /user/education`</Link>, education entries
+- <Link href="/linktrees">`GET /user/linktrees`</Link>, your link trees
 
-All endpoints are served from `https://api.remoet.dev`. See <Link href="/get-started/authorization">Authorization</Link> for the header shape.
+All endpoints are served from `https://api.remoet.dev`. See <Link href="/get-started/authorization">Authorization</Link> for the header shape and <Link href="/errors">Errors</Link> for failure bodies.

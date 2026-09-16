@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og'
 
-export const alt = 'remoet.dev developer documentation'
+export const alt = 'Remoet developer documentation'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -67,7 +67,7 @@ export default function OG() {
           }}
         >
           <span>remoet.dev</span>
-          <span>MCP · REST · Free tier</span>
+          <span>MCP · REST · Free</span>
         </div>
       </div>
     ),

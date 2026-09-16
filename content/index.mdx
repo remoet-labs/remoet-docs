@@ -1,27 +1,37 @@
 ---
-title: remoet.dev developer documentation
-description: Connect AI agents to your remoet.dev data via MCP, or fetch your profile programmatically via the REST API. Start here.
+title: MCP server and jobs API
+description: Connect an AI agent to Remoet over MCP, or fetch your own profile over the REST API. Free, no plans.
 ---
+
+import Link from 'next/link'
 
 # Introduction
 
-Welcome to the remoet.dev developer documentation.
+Welcome to the Remoet developer documentation.
 
-## What is remoet.dev?
+## What is Remoet?
 
-remoet.dev tracks tech jobs from companies you care about and connects them to your AI agents. Browse the consumer site at [www.remoet.dev](https://www.remoet.dev).
+Remoet lets you track tech jobs from companies you love, and puts them in reach of your AI agent. The whole job catalogue is public at [www.remoet.dev/jobs](https://www.remoet.dev/jobs). Star a company and its new roles land in your own feed. Browse the product at [www.remoet.dev](https://www.remoet.dev).
+
+Remoet is free. There are no plans and nothing to upgrade to. See <Link href="/limits">Limits</Link>.
 
 ## What can I build against?
 
-Two surfaces are available to developers:
+Two surfaces:
 
-- **[MCP server](/mcp)** — the agent-native interface. Connect Claude, Cursor, Codex, or any MCP-capable client and let the agent read and write your remoet.dev data directly. Free tier eligible.
-- **REST API** — the original developer interface. Lets you fetch your own profile data (jobs, projects, education, links, link trees) programmatically. Useful for portfolio sites and external integrations.
+- **<Link href="/mcp">MCP server</Link>**, the agent-native interface. Connect Claude Code, claude.ai, Claude Desktop, Cursor, VS Code, Windsurf, Codex, Hermes, OpenClaw or any MCP client, and let the agent search jobs, star companies and maintain your profile. Hermes and OpenClaw users can install the packaged <Link href="/mcp/skills">agent skill</Link>.
+- **REST API**, the original developer interface. Fetch your own profile data (work history, projects, education, links, link trees) to render on your own site or pull into your own tooling.
 
-Both authenticate against the same key you generate at [www.remoet.dev/api-keys](https://www.remoet.dev/api-keys).
+Both take the same API key, generated at [www.remoet.dev/agents](https://www.remoet.dev/agents).
 
 ## Why expose this?
 
-We're building for developers. Your data is yours; you should be able to pull it out and build on top of it. That's the philosophy. No gatekeeping.
+We build for developers. Your data is yours, and you should be able to pull it out and build on top of it. No gatekeeping.
 
-If you want to plug an agent into your remoet.dev data, jump to [MCP](/mcp). If you want to render your profile on your own site, check the [REST endpoints](/get-started) or the [starter template](/starter-template).
+If you want to plug an agent into Remoet, jump to <Link href="/mcp">MCP</Link>. If you want to render your profile on your own site, start with the <Link href="/get-started">REST endpoints</Link> or the <Link href="/starter-template">starter template</Link>.
+
+## Elsewhere
+
+- [www.remoet.dev/mcp](https://www.remoet.dev/mcp), the product page for the MCP server, with a one-click install per client
+- [www.remoet.dev/hermes](https://www.remoet.dev/hermes) and [www.remoet.dev/openclaw](https://www.remoet.dev/openclaw), harness-specific setup
+- [Discord](https://discord.gg/yxJA6cBs8U), for questions
