@@ -18,7 +18,7 @@ Remoet is free. There are no plans, no paid tiers and nothing to upgrade to, so 
 | MCP requests per day | 5,000 |
 | REST API requests per day | 5,000 |
 | Link trees | 10 |
-| API keys | 5 |
+| API keys | 5, each valid 365 days |
 
 Job data is real time for everyone.
 
@@ -26,11 +26,13 @@ Job data is real time for everyone.
 
 **Starring costs no budget.** You can hold 50 active stars. Starring consumes nothing; only unstarring draws on a budget, 25 per rolling 30 day period. That stops cycling through the catalogue without making the useful action expensive.
 
+**Going over the star cap costs you stars.** You cannot star past 50, so this only bites if your account is over the cap some other way. When it happens, Remoet emails you a warning and starts a 14 day clock. Trim back under 50 in that window and nothing is lost. If the window runs out while you are still over, the surplus is deleted: newest stars first, oldest kept. `get_account` reports the state and the deadline, so an agent can see it coming.
+
 **A star buys delivery, not access.** The job catalogue is public: [www.remoet.dev/jobs](https://www.remoet.dev/jobs) and the `search_jobs` tool read every open role on the board with no account-level gate and no star. Starring a company puts its new roles into your own feed and unlocks its full tech stack detail.
 
 **The daily request numbers are an abuse threshold, not a product gate.** MCP and REST are counted separately, per account rather than per key, and both reset at 00:00 UTC. A normal agent session does not come close. If you are hitting them legitimately, get in touch.
 
-**Some calls are free of the daily count.** `get_account` and the profile write tools do not consume MCP requests, because checking your budget or filling in a profile should never cost you quota.
+**Some calls are free of the daily count.** `get_account` and the profile tools, reads and writes both, do not consume MCP requests, because checking your budget or filling in a profile should never cost you quota.
 
 **Burst limits sit in front of the daily count.** MCP allows 120 requests per minute per API key on each route. REST allows 60 requests per minute per endpoint, and 30 per minute on `/user/full`. Both return `429`. See <Link href="/errors">Errors</Link> for the exact bodies.
 

@@ -15,6 +15,8 @@ Create a profile at [www.remoet.dev](https://www.remoet.dev). You can sign in wi
 
 Once signed in, go to [www.remoet.dev/agents](https://www.remoet.dev/agents). You can hold up to **5 keys per account**. Each key works against both the MCP server and the REST API.
 
+**Keys expire 365 days after they are created.** An expired key returns `401` with `"message": "API Key Expired"`, so a long-running integration will stop a year after you set it up unless you rotate it. Mint the replacement before you delete the old one, swap it in, then revoke. Connectors on the OAuth route hold a key of their own and are expired by the same clock, so reconnect them the same way.
+
 Daily request limits are counted per account, not per key: **5,000 MCP requests and 5,000 REST requests per day**, reset at 00:00 UTC. They are an abuse threshold rather than a product gate. See <Link href="/limits">Limits</Link>.
 
 ## Use your key

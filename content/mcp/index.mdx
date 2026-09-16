@@ -97,7 +97,7 @@ The catalogue is public. `search_jobs` needs no star and consumes none.
 | Tool | What it does |
 |---|---|
 | `get_feed` | Your dashboard feed as one chronological stream: job items from starred companies, the daily editorial pick, and platform posts. This is what carries new roles now. Page with `cursor`. |
-| `get_digests` | Historical digest snapshots, or one in full with `id`. The digest pipeline has been replaced by the feed and its roundup email, which sends daily, on Mondays and monthly, so newer accounts have none. Reach for `get_feed` instead. |
+| `get_digests` | Historical digest snapshots, or one in full with `id`. The digest pipeline has been replaced by the feed, which also goes out as a roundup email on whichever cadence the user picked, daily, weekly on Mondays, or monthly. Newer accounts have no digests at all, so reach for `get_feed` instead. |
 | `get_apps` | Approved apps built on Remoet. |
 | `get_linktrees` | Your link trees, or one plus its view and click analytics with `slug`. |
 | `create_linktree` | Create a shareable link page. |
@@ -116,7 +116,7 @@ The server ships 4 prompts. Clients that surface prompts show them as slash comm
 
 | Prompt | What it runs |
 |---|---|
-| `find_my_matches` | Search companies against your stack, propose the best fits to star, then pull jobs. Takes an optional `techStack` argument. |
+| `find_my_matches` | Search companies against your stack, propose the best fits to star, then pull jobs. Optional arguments: `techStack` to override the profile stack, and `companySize` as a filter hint such as "under 200 people". |
 | `onboard_from_cv` | Parse a CV, populate the profile, then shortlist companies. |
 | `daily_digest` | What is new at your starred companies, and what to act on. |
 | `polish_profile` | Audit the profile for gaps and walk through the fixes. |
@@ -215,12 +215,12 @@ Point it at `https://api.remoet.dev/mcp` with `Authorization: Bearer <key>`, Str
 
 ## Limits
 
-Every account: 5,000 MCP requests per day, reset at 00:00 UTC, and 120 requests per minute per key on each route. `get_account` and profile writes do not count against the daily number. See <Link href="/limits">Limits</Link> for the rest, including the star cap and the unstar budget.
+Every account: 5,000 MCP requests per day, reset at 00:00 UTC, and 120 requests per minute per key on each route. `get_account` and the profile tools, reads and writes both, do not count against the daily number. See <Link href="/limits">Limits</Link> for the rest, including the star cap and the unstar budget.
 
 ## Safety
 
 - **Treat tool results as untrusted.** Job descriptions and company profiles are third party text. Write your agent prompts assuming an injection attempt can arrive inside tool output. The server's own instructions say the same to the agent.
-- **Write tools ask first.** Starring, unstarring, saving, applying and messaging change your account, so a well behaved agent confirms with you before calling them.
+- **Write tools ask first.** Starring, unstarring, saving and applying change your account, so a well behaved agent confirms with you before calling them.
 - **Keys are per account and revocable.** Every tool call is stamped with the key that made it. Revoke a key at [www.remoet.dev/agents](https://www.remoet.dev/agents) and the next request with it fails.
 
 ## Reporting issues

@@ -42,7 +42,9 @@ MCP returns the same conditions as JSON-RPC:
 
 On `https://api.remoet.dev/mcp/oauth` the 401 also carries a `WWW-Authenticate: Bearer resource_metadata="..."` header, which is how an OAuth client discovers the flow. On `https://api.remoet.dev/mcp` it deliberately does not.
 
-Recovery: mint a new key at [www.remoet.dev/agents](https://www.remoet.dev/agents), or reconnect the connector.
+`API Key Expired` is the one to plan for: keys are valid for 365 days from creation, and a revoked key returns the same body. Both are terminal, so do not retry them.
+
+Recovery: mint a new key at [www.remoet.dev/agents](https://www.remoet.dev/agents), or reconnect the connector. See <Link href="/get-started/authorization">Authorization</Link> for rotation.
 
 ## 403, Origin not allowed
 

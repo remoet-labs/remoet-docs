@@ -50,6 +50,16 @@ The exact 401 body depends on what is wrong with the request:
 
 To tell "missing header" from "bad key" in your client, key off `message`. See <Link href="/errors">Errors</Link> for the full catalog.
 
+## Key lifetime
+
+A key is valid for **365 days** from the moment it is created, and there is no renewal in place: you mint a new one. Nothing warns you as the date approaches, so put the rotation in your own calendar if the integration matters. Past the date every request returns:
+
+```json
+{ "message": "API Key Expired", "error": "Unauthorized", "statusCode": 401 }
+```
+
+Revoking a key at [www.remoet.dev/agents](https://www.remoet.dev/agents) produces the same response immediately, so treat that body as "this key is finished, get another one" rather than as a transient failure. Never retry it.
+
 ## Keeping the key safe
 
 Treat the key like a password. Never ship it to the browser: use it from server-side code, or from `.env` files that are not committed. If a key leaks, revoke it at [www.remoet.dev/agents](https://www.remoet.dev/agents) and generate a new one. Revocation takes effect on the next request.

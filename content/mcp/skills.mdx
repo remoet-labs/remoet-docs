@@ -73,7 +73,7 @@ Prefer an API key? Point OpenClaw at the plain route instead and let it substitu
 openclaw mcp set remoet '{"url":"https://api.remoet.dev/mcp","transport":"streamable-http","headers":{"Authorization":"Bearer ${REMOET_API_KEY}"}}'
 ```
 
-OpenClaw substitutes `${VAR_NAME}` into any config string value, uppercase names only, and an unset variable stays visibly unresolved with a warning rather than failing quietly. Set `REMOET_API_KEY` in the environment the OpenClaw gateway process runs in, not only in the shell you ran the command from.
+OpenClaw substitutes `${VAR_NAME}` into config string values, so the key itself never lands in the file. Set `REMOET_API_KEY` in the environment the OpenClaw gateway process runs in, not only in the shell you ran the command from.
 
 Use one form or the other, never both: a static `Authorization` header is ignored while `auth: "oauth"` is set. `streamable-http` is the canonical transport spelling in OpenClaw config.
 
