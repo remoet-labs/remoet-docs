@@ -1,13 +1,13 @@
 ---
 title: GET /user/projects
-description: Returns the projects on your remoet.dev profile — title, tech stack, repo and demo URLs, role, dates, optional link to the job the project was built at.
+description: Returns the projects on your Remoet profile: title, tech stack, repo and demo URLs, role, dates, and an optional link to the job the project was built at.
 ---
 
 import Link from 'next/link'
 
 # `GET /user/projects`
 
-Returns the projects on your remoet.dev profile, sorted with current first then by start date descending.
+Returns the projects on your Remoet profile, sorted with current first then by start date descending.
 
 ## Basic Information
 - type: `REST`
@@ -96,6 +96,6 @@ class PublicUserProjectDto {
 
 ## See also
 
-- <Link href="/full">`/user/full`</Link> — same projects plus the rest of your profile
+- <Link href="/full">`/user/full`</Link>, the same projects plus the rest of your profile
 - <Link href="/get-started/authorization">Authorization</Link>
 - [Errors](/errors)

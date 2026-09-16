@@ -69,11 +69,11 @@ class PublicUserLinksDto {
 }
 ```
 
-Fields you haven't filled in return `null`. Fields you've marked private also return `null` — the endpoint scrubs them server-side. If you need the raw values regardless of visibility, use <Link href="/full">`/user/full`</Link> instead (your own key, your own data, no scrub).
+Fields you haven't filled in return `null`. Fields you've marked private also return `null`: the endpoint scrubs them server-side. If you need the raw values regardless of visibility, use <Link href="/full">`/user/full`</Link> instead (your own key, your own data, no scrub).
 
 ## See also
 
-- <Link href="/full">`/user/full`</Link> — same fields plus the rest of your profile, with `isPublic` flags preserved
+- <Link href="/full">`/user/full`</Link>, the same fields plus the rest of your profile, with `isPublic` flags preserved
 - <Link href="/get-started/authorization">Authorization</Link>
 - [Errors](/errors)
 

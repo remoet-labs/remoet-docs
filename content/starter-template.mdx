@@ -5,8 +5,10 @@ description: Minimal Next.js portfolio template that fetches your remoet.dev pro
 
 # Starter Template
 
-The remoet.dev portfolio starter template is a minimal, static portfolio site built with Next.js, Tailwind CSS, and TypeScript.
-It fetches your data from the remoet.dev API at build time, so your API key is never exposed to the client.
+The Remoet portfolio starter template is a minimal, static portfolio site built with Next.js, Tailwind CSS, and TypeScript.
+It fetches your data from the Remoet API at build time, so your API key is never exposed to the client.
+
+Source: [github.com/remoet-labs/starter-template](https://github.com/remoet-labs/starter-template). Live demo: [remoet-starter.vercel.app](https://remoet-starter.vercel.app).
 
 ## Features
 
@@ -22,7 +24,7 @@ It fetches your data from the remoet.dev API at build time, so your API key is n
 ### 1. Clone the template
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/remoet-labs/starter-template
 cd starter-template
 yarn install
 ```
@@ -35,7 +37,7 @@ Create a `.env.local` file:
 REMOET_API_KEY=your_api_key_here
 ```
 
-You can generate an API key at [www.remoet.dev/api-keys](https://www.remoet.dev/api-keys).
+You can generate an API key at [www.remoet.dev/agents](https://www.remoet.dev/agents).
 
 ### 3. Run locally
 
@@ -53,10 +55,10 @@ Deploy to [Vercel](https://vercel.com) and add `REMOET_API_KEY` as an environmen
 
 The template uses the `GET /user/full` endpoint which returns:
 
-- **Profile** — name, avatar, summary, location, social links
-- **Experience** — work history with company, role, technologies, dates
-- **Projects** — project cards with description, tech stack, repo/demo links
-- **Education** — institution, degree level, field of study, dates, current badge, description
+- **Profile**: name, avatar, summary, location, social links
+- **Experience**: work history with company, role, technologies, dates
+- **Projects**: project cards with description, tech stack, repo and demo links
+- **Education**: institution, degree level, field of study, dates, current badge, description
 
 ## Customization
 
