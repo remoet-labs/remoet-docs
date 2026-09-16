@@ -1,13 +1,13 @@
 ---
 title: Authorization
-description: Pass your remoet.dev API key on the standard Authorization Bearer header. Same key works for both the REST API and the MCP server.
+description: Pass your Remoet API key on the standard Authorization Bearer header. The same key works for the REST API and the MCP server.
 ---
 
 import Link from 'next/link'
 
 # Authorization
 
-The <Link href="/get-started">Get Started</Link> page covers how to mint an API key. This page covers how to pass it to a request.
+The <Link href="/get-started">Get Started</Link> page covers how to mint an API key. This page covers how to pass it.
 
 ## Bearer scheme
 
@@ -35,34 +35,34 @@ const res = await fetch("https://api.remoet.dev/user/hello", {
 
 ## What a bad key returns
 
-The exact 401 body depends on what's wrong with the request:
+The exact 401 body depends on what is wrong with the request:
 
 ```json
 // Authorization header is missing entirely
-{ "statusCode": 401, "message": "Unauthorized" }
+{ "message": "Unauthorized", "statusCode": 401 }
 
 // Header is present but the key isn't recognised
-{ "statusCode": 401, "message": "Invalid API Key", "error": "Unauthorized" }
+{ "message": "Invalid API Key", "error": "Unauthorized", "statusCode": 401 }
 
-// Key is recognised but expired (revoked or aged out)
-{ "statusCode": 401, "message": "API Key Expired", "error": "Unauthorized" }
+// Key is recognised but expired or revoked
+{ "message": "API Key Expired", "error": "Unauthorized", "statusCode": 401 }
 ```
 
-If you want to distinguish "missing header" from "bad key" in your client, key off the `message` field. See [Errors](/errors) for the full error catalog.
+To tell "missing header" from "bad key" in your client, key off `message`. See <Link href="/errors">Errors</Link> for the full catalog.
 
 ## Keeping the key safe
 
-Treat the key like a password. Never ship it to the browser — use it from server-side code, or from `.env` files that aren't committed. If a key leaks, revoke it from [www.remoet.dev/api-keys](https://www.remoet.dev/api-keys) and generate a new one.
+Treat the key like a password. Never ship it to the browser: use it from server-side code, or from `.env` files that are not committed. If a key leaks, revoke it at [www.remoet.dev/agents](https://www.remoet.dev/agents) and generate a new one. Revocation takes effect on the next request.
 
 ## Rate limits
 
-There are two layers:
+Two layers:
 
-- **Burst**: 60 requests per minute per endpoint (30/min for `/user/full`).
-- **Daily quota**: tier-based — see <Link href="/get-started">Get Started</Link>.
+- **Burst**: 60 requests per minute per endpoint, 30 per minute on `/user/full`.
+- **Daily**: 5,000 REST requests per account per day, reset at 00:00 UTC. MCP has its own separate 5,000.
 
-Both layers return `429 Too Many Requests` on exhaustion. The body distinguishes them — see [Errors](/errors).
+Both return `429`. The bodies differ, so you can tell them apart. See <Link href="/errors">Errors</Link> and <Link href="/limits">Limits</Link>.
 
 ## MCP
 
-The MCP server uses the same key over the `Authorization: Bearer <key>` header or via an OAuth flow (Claude Web's custom connector). See <Link href="/mcp">MCP</Link>.
+The MCP server takes the same key on `Authorization: Bearer <key>` at `https://api.remoet.dev/mcp`. Browser connectors use the OAuth route, `https://api.remoet.dev/mcp/oauth`, and never handle a key at all. See <Link href="/mcp">MCP server</Link>.
