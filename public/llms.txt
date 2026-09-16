@@ -1,0 +1,37 @@
+# Remoet developer documentation
+
+> Remoet lets you track tech jobs from companies you love, and puts them in reach of your AI agent. The job catalogue is public: every open role on the board can be searched without starring anything. Starring a company delivers its new roles into your own feed. Remoet is free, with no plans and nothing to upgrade to. These docs cover the MCP server for agents and the REST API for your own code.
+
+## MCP server
+
+- [MCP server](https://docs.remoet.dev/mcp): Endpoints, API key and OAuth auth, all 24 tools, the 4 prompts, per-client setup for Claude Code, claude.ai, Claude Desktop, Cursor, VS Code, Windsurf and Codex, plus limits and safety.
+- [Agent skills](https://docs.remoet.dev/mcp/skills): Installing Remoet as an agentskills.io skill on Hermes and OpenClaw, and where the skill is listed.
+- Endpoints: `https://api.remoet.dev/mcp` takes `Authorization: Bearer <key>`; `https://api.remoet.dev/mcp/oauth` runs OAuth 2.1 with PKCE and dynamic client registration for browser connectors. Transport is Streamable HTTP and stateless: POST only, GET returns 405, no session id.
+- Tools: search_jobs, get_starred_jobs, save_job, get_saved_jobs, update_saved_job_note, unsave_job, search_listings, get_listing, star_listing, unstar_listing, get_profile, update_profile, save_work_experience, save_project, save_education, delete_profile_item, get_feed, get_digests, get_apps, get_linktrees, create_linktree, delete_linktree, apply_to_job, get_account.
+- Prompts: find_my_matches, onboard_from_cv, daily_digest, polish_profile.
+
+## Getting started
+
+- [Get Started](https://docs.remoet.dev/get-started): Sign up, generate an API key at www.remoet.dev/agents (5 per account), then pick MCP or REST.
+- [Authorization](https://docs.remoet.dev/get-started/authorization): The Bearer header, the 401 bodies, and rate limits.
+- [Limits](https://docs.remoet.dev/limits): Remoet is free. Every account: 50 active stars, 25 unstars per 30 days, 5,000 MCP requests per day, 5,000 REST requests per day, 10 link trees.
+- [Errors](https://docs.remoet.dev/errors): Every status code with its exact body, plus the retry policy.
+
+## REST API
+
+- [GET /user/full](https://docs.remoet.dev/full): The whole profile in one response.
+- [GET /user/hello](https://docs.remoet.dev/hello): Health check for your key.
+- [GET /user/links](https://docs.remoet.dev/links): Social links, with private fields returned as null.
+- [GET /user/jobs](https://docs.remoet.dev/jobs): Work history.
+- [GET /user/projects](https://docs.remoet.dev/projects): Projects.
+- [GET /user/education](https://docs.remoet.dev/education): Education entries.
+- [GET /user/linktrees](https://docs.remoet.dev/linktrees): Link trees, and one per slug.
+- [Starter template](https://docs.remoet.dev/starter-template): Next.js portfolio site built on GET /user/full.
+
+## Optional
+
+- [Remoet](https://www.remoet.dev): The product.
+- [Public job board](https://www.remoet.dev/jobs): Every open role, no account needed.
+- [MCP product page](https://www.remoet.dev/mcp): One-click install per client.
+- [Hermes setup](https://www.remoet.dev/hermes) and [OpenClaw setup](https://www.remoet.dev/openclaw).
+- [Discord](https://discord.gg/yxJA6cBs8U): Questions and bug reports.
