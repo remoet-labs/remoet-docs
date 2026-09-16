@@ -1,98 +1,114 @@
 ---
 title: Errors
-description: Every error response the remoet.dev API surfaces, with status codes, exact JSON bodies, and what triggers each. Use this to wire retry and recovery logic.
+description: Every error the Remoet REST API and MCP server return, with status codes, exact bodies and what triggers each. Use it to wire retry and recovery logic.
 ---
 
 import Link from 'next/link'
 
 # Errors
 
-Every response that isn't a 2xx is documented here. Wire your client to key off `statusCode` first, then `message` if you need to distinguish variants within a code.
+Everything that is not a 2xx is documented here. Key off `statusCode` first, then `message` when you need to tell variants apart.
 
-## 400 — Bad Request
+MCP replies are JSON-RPC, so a transport level failure arrives as `{ "jsonrpc": "2.0", "error": { "code": -32000, "message": "..." }, "id": null }` with the HTTP status named below. A failure inside a tool is different: see [MCP tool errors](#mcp-tool-errors).
 
-Returned when the request shape is wrong. Common cases:
+## 400, Bad Request
 
-- **MCP**: missing or malformed initialize handshake on first request to `/mcp`.
-- **REST**: a path parameter fails validation (e.g. an invalid linktree slug shape).
+The request shape is wrong. Common cases: a path parameter that fails validation on REST, or a malformed JSON-RPC body on MCP.
 
 ```json
 { "statusCode": 400, "message": "...specific reason...", "error": "Bad Request" }
 ```
 
-## 401 — Unauthorized
+## 401, Unauthorized
 
-The exact body varies. Key off `message`:
+REST bodies vary by cause:
 
 ```json
-// Header missing
-{ "statusCode": 401, "message": "Unauthorized" }
+// Authorization header missing
+{ "message": "Unauthorized", "statusCode": 401 }
 
 // Header present, key unknown
-{ "statusCode": 401, "message": "Invalid API Key", "error": "Unauthorized" }
+{ "message": "Invalid API Key", "error": "Unauthorized", "statusCode": 401 }
 
-// Header present, key recognised, expired or revoked
-{ "statusCode": 401, "message": "API Key Expired", "error": "Unauthorized" }
+// Key recognised but revoked or expired
+{ "message": "API Key Expired", "error": "Unauthorized", "statusCode": 401 }
 ```
 
-Recovery: regenerate at [www.remoet.dev/api-keys](https://www.remoet.dev/api-keys).
+MCP returns the same conditions as JSON-RPC:
 
-## 404 — Not Found
+```json
+{ "jsonrpc": "2.0", "error": { "code": -32000, "message": "Missing API key" }, "id": null }
+```
 
-### Resource by slug doesn't exist
+On `https://api.remoet.dev/mcp/oauth` the 401 also carries a `WWW-Authenticate: Bearer resource_metadata="..."` header, which is how an OAuth client discovers the flow. On `https://api.remoet.dev/mcp` it deliberately does not.
+
+Recovery: mint a new key at [www.remoet.dev/agents](https://www.remoet.dev/agents), or reconnect the connector.
+
+## 403, Origin not allowed
+
+Only browser clients can hit this. The MCP routes check the `Origin` header against an allowlist as required by the MCP spec, so a page on an unknown origin cannot drive your agent's connection.
+
+```json
+{ "jsonrpc": "2.0", "error": { "code": -32000, "message": "Origin not allowed" }, "id": null }
+```
+
+Command line and server side clients send no `Origin` and are unaffected.
+
+## 404, Not Found
+
+A resource that does not exist, or is not yours:
 
 ```json
 { "statusCode": 404, "message": "Link tree not found", "error": "Not Found" }
 ```
 
-Returned by routes like `/user/linktrees/:slug` when the slug isn't yours or doesn't exist.
+There is no MCP session 404. The MCP server is stateless, so there is no session to go stale and nothing to re-initialize.
 
-### MCP session expired
+## 405, Method Not Allowed
 
-```
-HTTP/1.1 404 Not Found
-```
-
-The MCP server returns 404 (per spec) when a session ID is stale or unknown. Your client should treat this as "reconnect" — re-initialize the session rather than treat it as a hard error. Compliant MCP clients handle this transparently.
-
-## 429 — Too Many Requests
-
-Both burst and daily quota exhaustion return 429. Distinguish them by `message`:
+`GET` on an MCP route. The stateless transport has no server to client stream, so use `POST`.
 
 ```json
-// Burst: more than 60 req/min on most endpoints, 30/min on /user/full
-{ "statusCode": 429, "message": "Rate limit exceeded" }
-
-// Daily quota: over your plan's daily request cap
-{ "statusCode": 429, "message": "Daily API limit exceeded. Resets at midnight UTC." }
+{ "jsonrpc": "2.0", "error": { "code": -32000, "message": "Method not allowed (stateless transport)" }, "id": null }
 ```
 
-Recovery:
+## 429, Too Many Requests
 
-- **Burst**: back off ~5 seconds and retry. Jitter helps if you're parallelising.
-- **Daily**: wait until 00:00 UTC, or upgrade your plan via <Link href="/tiers">Tiers</Link>.
+Two separate layers, told apart by `message`.
 
-## 500 — Internal Server Error
+Burst, from the per minute limiter (MCP: 120 per minute per key on each route; REST: 60 per minute per endpoint, 30 on `/user/full`):
 
-Something went wrong on our end. The response body may be empty or include a generic message:
+```json
+{ "statusCode": 429, "message": "Rate limit exceeded", "error": "Too Many Requests" }
+```
+
+It also sets `X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset`, the last in seconds until the window rolls.
+
+Daily, at 5,000 requests per account per surface:
+
+```json
+{
+  "statusCode": 429,
+  "message": "Daily API request limit reached (5000/day). This is an abuse threshold, not a product gate: if you are hitting it legitimately, get in touch.",
+  "limit": 5000
+}
+```
+
+On MCP the same message comes back as a JSON-RPC error and says `Daily MCP request limit reached`.
+
+Recovery: on burst, back off about 5 seconds with jitter. On the daily limit, wait for 00:00 UTC, or get in touch if you have a real workload that needs more. There is nothing to buy. See <Link href="/limits">Limits</Link>.
+
+## 500, Internal Server Error
 
 ```json
 { "statusCode": 500, "message": "Internal server error" }
 ```
 
-Recovery: retry with exponential backoff. If a route 500s consistently, open an issue at [github.com/remoet-labs/remoet-docs](https://github.com/remoet-labs/remoet-docs) or ping us on [Discord](https://discord.gg/yxJA6cBs8U).
+Retry with exponential backoff. If a route fails consistently, open an issue at [github.com/remoet-labs/remoet-docs](https://github.com/remoet-labs/remoet-docs) or ping us on [Discord](https://discord.gg/yxJA6cBs8U).
 
-## 503 — Service Unavailable
+## MCP tool errors
 
-Returned by billing-gated endpoints when paid tiers are disabled platform-wide (the kill switch for emergency rollback). Rare — only fires if we've temporarily turned off billing. Retry later.
-
-```json
-{ "statusCode": 503, "message": "Paid tiers temporarily disabled", "error": "Service Unavailable" }
-```
-
-## MCP tool-level errors
-
-A tool call that fails returns success at the transport level (HTTP 200) but flips `isError: true` in the JSON-RPC result:
+A tool that fails still returns HTTP 200 and a valid JSON-RPC result, with `isError` set:
 
 ```json
 {
@@ -103,22 +119,24 @@ A tool call that fails returns success at the transport level (HTTP 200) but fli
 }
 ```
 
-This means a bad tool call never tears down the session. Your client should surface the error text to the user and let them retry or call a different tool.
+One bad tool call never breaks the connection. Surface the text to the user and let them retry or call something else.
 
-## Recommended retry policy
+## Retry policy
 
 | Status | Retry? | How |
 |---|---|---|
 | 400 | No | Fix the request |
 | 401 | No | Refresh credentials |
-| 404 (resource) | No | Resource gone or never existed |
-| 404 (MCP session) | Yes | Re-initialize the session |
-| 429 (burst) | Yes | Back off ~5s with jitter |
-| 429 (daily) | No until tomorrow / upgrade | Honour the reset |
-| 500/502/503/504 | Yes | Exponential backoff: 1s, 2s, 4s, 8s, give up after ~4 attempts |
+| 403 | No | Use an allowed origin, or a client that sends none |
+| 404 | No | The resource is gone or was never yours |
+| 405 | No | Use POST |
+| 429 burst | Yes | Back off about 5s with jitter |
+| 429 daily | Not today | Honour the 00:00 UTC reset |
+| 500, 502, 503, 504 | Yes | Exponential backoff: 1s, 2s, 4s, 8s, then give up |
+| Tool `isError` | Depends | Read the message; it is usually a bad argument |
 
 ## See also
 
-- <Link href="/get-started/authorization">Authorization</Link> — header shape
-- <Link href="/tiers">Tiers</Link> — daily quotas per plan
-- <Link href="/mcp">MCP server</Link> — session lifecycle and tool result shape
+- <Link href="/get-started/authorization">Authorization</Link>, the header shape
+- <Link href="/limits">Limits</Link>, the daily and burst numbers
+- <Link href="/mcp">MCP server</Link>, transport behaviour and tool results
