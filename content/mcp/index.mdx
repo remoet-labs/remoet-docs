@@ -20,7 +20,9 @@ The same tools are served at two routes. The route decides how you authenticate.
 | `https://api.remoet.dev/mcp` | `Authorization: Bearer <key>` | Claude Code, Cursor, VS Code, Windsurf, Codex, Hermes, servers and scripts |
 | `https://api.remoet.dev/mcp/oauth` | OAuth 2.1, PKCE (S256), dynamic client registration | claude.ai, Claude Desktop, any browser client that negotiates OAuth |
 
-Both speak Streamable HTTP. The split is deliberate: `/mcp` never returns an OAuth challenge, so a client configured with a static header is not dragged into a browser flow, and `/mcp/oauth` always returns one, so a connector can discover the flow on its own. Point an OAuth client at `/mcp` and it will see a plain `401` and stop.
+Both speak Streamable HTTP. The split is deliberate: `/mcp` never returns an OAuth challenge, so a client configured with a static header is not dragged into a browser flow, and `/mcp/oauth` returns one on any tool that needs an account, so a connector can discover the flow on its own.
+
+Point an OAuth client at `/mcp` and nothing challenges it. It connects, lists all 24 tools, and `search_jobs` and `get_listing` work, because those need no account. Every other tool then fails in band, with a message naming the oauth route. So the symptom of the wrong route is a working connection with account tools that will not run, not a connection error. Use the route your client can negotiate.
 
 The server is **stateless**. Every request stands alone.
 
@@ -125,7 +127,9 @@ The server ships 4 prompts. Clients that surface prompts show them as slash comm
 
 Every tool returns standard MCP content blocks: `{ content: [{ type: "text", text: "..." }] }`. A tool that fails returns `{ isError: true, content: [...] }` with HTTP 200, so one bad call never breaks the connection.
 
-Transport level failures come back as JSON-RPC errors with a matching HTTP status: `401` for a missing or invalid key, `403` for a disallowed browser origin, `429` for the burst or daily limit, `405` on `GET`. See <Link href="/errors">Errors</Link>.
+Transport level failures come back as JSON-RPC errors with a matching HTTP status: `401` for a key that is present but not valid, `403` for a disallowed browser origin, `429` for the burst or daily limit, `405` on `GET`. See <Link href="/errors">Errors</Link>.
+
+A key that is absent is not the same as one that is wrong. On `/mcp` no key at all is not a transport failure: the call returns `200` and the tool itself reports that it needs an account. On `/mcp/oauth` it is a `401`, carrying the `WWW-Authenticate` header the connector needs to start the flow.
 
 ## Client setup
 
@@ -145,7 +149,7 @@ Settings, then Connectors, then **Add custom connector**, and paste:
 https://api.remoet.dev/mcp/oauth
 ```
 
-Click Connect, then Authorize. No API key to copy.
+Click Connect, then Authorize. Signed in to Remoet, that is one click with no key to copy.
 
 ### Cursor
 

@@ -1,6 +1,6 @@
 ---
 title: Authorization
-description: Pass your Remoet API key on the standard Authorization Bearer header. The same key works for the REST API and the MCP server.
+description: Pass your Remoet API key on the standard Authorization Bearer header. The same key works for the REST API and the MCP server, and browser connectors use OAuth instead.
 ---
 
 import Link from 'next/link'
@@ -8,6 +8,10 @@ import Link from 'next/link'
 # Authorization
 
 The <Link href="/get-started">Get Started</Link> page covers how to mint an API key. This page covers how to pass it.
+
+If you are connecting claude.ai or Claude Desktop, you authenticate with **OAuth** at `https://api.remoet.dev/mcp/oauth` instead and the connector holds its own key. See <Link href="/mcp">MCP server</Link>.
+
+The Bearer header and the 401 bodies below are then not yours to handle. Two other things on this page still are: the rate limits, counted per account rather than per route, and the 365-day key lifetime, which expires a connector on the same clock.
 
 ## Bearer scheme
 
@@ -75,4 +79,4 @@ Both return `429`. The bodies differ, so you can tell them apart. See <Link href
 
 ## MCP
 
-The MCP server takes the same key on `Authorization: Bearer <key>` at `https://api.remoet.dev/mcp`. Browser connectors use the OAuth route, `https://api.remoet.dev/mcp/oauth`, and never handle a key at all. See <Link href="/mcp">MCP server</Link>.
+The MCP server takes the same key on `Authorization: Bearer <key>` at `https://api.remoet.dev/mcp`. See <Link href="/mcp">MCP server</Link>.

@@ -11,6 +11,13 @@ import Link from 'next/link'
 
 Create a profile at [www.remoet.dev](https://www.remoet.dev). You can sign in with GitHub or Google. Remoet is free.
 
+## Do you even need a key?
+
+Not always. There are two ways to authenticate, and one of them skips this page.
+
+- **OAuth**, for browser connectors. On claude.ai and Claude Desktop, add `https://api.remoet.dev/mcp/oauth` as a custom connector and click Authorize. If you are already signed in to Remoet that is one click and the connector holds its own key, so there is nothing for you to copy or store. If you are not signed in, the same screen lets you paste a key instead. Go straight to <Link href="/mcp">MCP server</Link>.
+- **An API key**, for everything else: the REST API, and MCP clients you configure with a static header (Claude Code, Cursor, VS Code, Windsurf, Codex, Hermes, OpenClaw, your own scripts). Carry on below.
+
 ## Generate an API key
 
 Once signed in, go to [www.remoet.dev/agents](https://www.remoet.dev/agents). You can hold up to **5 keys per account**. Each key works against both the MCP server and the REST API.
