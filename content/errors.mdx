@@ -34,13 +34,19 @@ REST bodies vary by cause:
 { "message": "API Key Expired", "error": "Unauthorized", "statusCode": 401 }
 ```
 
-MCP returns the same conditions as JSON-RPC:
+MCP returns JSON-RPC errors, and separates a key that is wrong from a key that is absent.
 
 ```json
-{ "jsonrpc": "2.0", "error": { "code": -32000, "message": "Missing API key" }, "id": null }
+// Key present, not valid. Both routes, HTTP 401.
+{ "jsonrpc": "2.0", "error": { "code": -32000, "message": "Invalid API Key" }, "id": null }
+
+// No key at all, on /mcp/oauth, calling a tool that needs an account. HTTP 401.
+{ "jsonrpc": "2.0", "error": { "code": -32001, "message": "\"get_profile\" needs a Remoet account. search_jobs and get_listing work without one." }, "id": 1 }
 ```
 
 On `https://api.remoet.dev/mcp/oauth` the 401 also carries a `WWW-Authenticate: Bearer resource_metadata="..."` header, which is how an OAuth client discovers the flow. On `https://api.remoet.dev/mcp` it deliberately does not.
+
+With no key at all, `https://api.remoet.dev/mcp` does not return 401 in the first place. The request succeeds, and the tool reports in band that it needs an account, pointing at the oauth route. `search_jobs` and `get_listing` need no account and answer normally.
 
 `API Key Expired` is the one to plan for: keys are valid for 365 days from creation, and a revoked key returns the same body. Both are terminal, so do not retry them.
 

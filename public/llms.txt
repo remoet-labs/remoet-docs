@@ -12,8 +12,8 @@
 
 ## Getting started
 
-- [Get Started](https://docs.remoet.dev/get-started): Sign up, then authenticate one of two ways. Browser connectors (claude.ai, Claude Desktop) add https://api.remoet.dev/mcp/oauth and authorize, with no API key involved. Everything else generates an API key at www.remoet.dev/agents (5 per account) and passes it on a header.
-- [Authorization](https://docs.remoet.dev/get-started/authorization): The Bearer header, the 401 bodies, and rate limits. API keys only; OAuth connectors never handle a key.
+- [Get Started](https://docs.remoet.dev/get-started): Sign up, then either authorize an OAuth connector at https://api.remoet.dev/mcp/oauth, which holds its own key, or generate an API key at www.remoet.dev/agents (5 per account) for every other client and for REST.
+- [Authorization](https://docs.remoet.dev/get-started/authorization): The Bearer header, the 401 bodies, and rate limits. The header is for API-key clients; the limits and the 365-day key lifetime apply to OAuth connectors too.
 - [Limits](https://docs.remoet.dev/limits): Remoet is free. Every account: 50 active stars, 25 unstars per 30 days, 5,000 MCP requests per day, 5,000 REST requests per day, 10 link trees.
 - [Errors](https://docs.remoet.dev/errors): Every status code with its exact body, plus the retry policy.
 

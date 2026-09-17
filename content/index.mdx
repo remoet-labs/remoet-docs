@@ -22,9 +22,9 @@ Two surfaces:
 - **<Link href="/mcp">MCP server</Link>**, the agent-native interface. Connect Claude Code, claude.ai, Claude Desktop, Cursor, VS Code, Windsurf, Codex, Hermes, OpenClaw or any MCP client, and let the agent search jobs, star companies and maintain your profile. Hermes and OpenClaw users can install the packaged <Link href="/mcp/skills">agent skill</Link>.
 - **REST API**, the original developer interface. Fetch your own profile data (work history, projects, education, links, link trees) to render on your own site or pull into your own tooling.
 
-Both take an API key, generated at [www.remoet.dev/agents](https://www.remoet.dev/agents), and one key works for both.
+Both take the same API key, generated at [www.remoet.dev/agents](https://www.remoet.dev/agents).
 
-The MCP server also speaks **OAuth**. On claude.ai and Claude Desktop you add `https://api.remoet.dev/mcp/oauth` as a custom connector, click Authorize, and there is no key to copy at all. See <Link href="/mcp">MCP server</Link>.
+The MCP server also speaks **OAuth**. On claude.ai and Claude Desktop you add `https://api.remoet.dev/mcp/oauth` as a custom connector, click Authorize, and the connector holds its own key. See <Link href="/mcp">MCP server</Link>.
 
 ## Why expose this?
 

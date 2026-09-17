@@ -15,7 +15,7 @@ Create a profile at [www.remoet.dev](https://www.remoet.dev). You can sign in wi
 
 Not always. There are two ways to authenticate, and one of them skips this page.
 
-- **OAuth**, for browser connectors. On claude.ai and Claude Desktop, add `https://api.remoet.dev/mcp/oauth` as a custom connector and click Authorize. The connector mints and holds a key for you, so there is nothing to copy, paste or store. Go straight to <Link href="/mcp">MCP server</Link>.
+- **OAuth**, for browser connectors. On claude.ai and Claude Desktop, add `https://api.remoet.dev/mcp/oauth` as a custom connector and click Authorize. If you are already signed in to Remoet that is one click and the connector holds its own key, so there is nothing for you to copy or store. If you are not signed in, the same screen lets you paste a key instead. Go straight to <Link href="/mcp">MCP server</Link>.
 - **An API key**, for everything else: the REST API, and MCP clients you configure with a static header (Claude Code, Cursor, VS Code, Windsurf, Codex, Hermes, OpenClaw, your own scripts). Carry on below.
 
 ## Generate an API key
@@ -31,8 +31,6 @@ Daily request limits are counted per account, not per key: **5,000 MCP requests 
 ### A. MCP server (for AI agents)
 
 Connecting Claude Code, claude.ai, Claude Desktop, Cursor, VS Code, Windsurf, Codex, Hermes or OpenClaw? See <Link href="/mcp">MCP server</Link> for the endpoints and per-client setup, and <Link href="/mcp/skills">Agent skills</Link> for the packaged Hermes and OpenClaw install. This is the recommended path for agent workflows.
-
-Two routes serve the same tools: `https://api.remoet.dev/mcp` takes the key on a header, and `https://api.remoet.dev/mcp/oauth` runs the OAuth flow for browser connectors. Point an OAuth client at `/mcp` and it sees a plain `401` and stops, so pick the route your client can negotiate.
 
 ### B. REST API (for your own code)
 
