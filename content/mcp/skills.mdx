@@ -13,13 +13,11 @@ Underneath it is the same <Link href="/mcp">MCP server</Link>. The skill adds th
 
 Source of truth: [remoet-labs/agent-skills](https://github.com/remoet-labs/agent-skills).
 
-## Get a key
+## A key is optional
 
-Generate a free API key at [www.remoet.dev/agents](https://www.remoet.dev/agents), or let the [onboarding flow](https://www.remoet.dev/onboarding) mint one for you. The same key works for the skill, the MCP server and the REST API. Then:
+The skill works without one: connected with no credential, the server answers `search_jobs` and `get_listing`, so your agent can search the public tech job board straight away. The other tools act on your account and need a free key or an OAuth sign-in.
 
-```bash
-export REMOET_API_KEY=<your key>
-```
+When you want those, generate a key at [www.remoet.dev/agents](https://www.remoet.dev/agents), or let the [onboarding flow](https://www.remoet.dev/onboarding) mint one for you. The same key works for the skill, the MCP server and the REST API.
 
 ## Install on Hermes
 
@@ -30,7 +28,15 @@ hermes skills tap add remoet-labs/agent-skills
 hermes skills install remoet-labs/agent-skills/skills/remoet
 ```
 
-Then add the server to `~/.hermes/config.yaml` under `mcp_servers`. Hermes resolves `${VAR}` in `url` and `headers` at connect time, so the key stays out of the file:
+Then connect the server:
+
+```bash
+hermes mcp add remoet --url https://api.remoet.dev/mcp
+```
+
+Hermes asks whether the server requires authentication. Answer `n` to search with no key, or `y` and paste your key, which Hermes saves to `~/.hermes/.env` and wires into the header. When it asks which tools to enable, a keyless setup only needs `search_jobs` and `get_listing`.
+
+Editing `~/.hermes/config.yaml` by hand works too. Hermes resolves `${VAR}` in `url` and `headers` at connect time, so keep the key in `~/.hermes/.env` as `REMOET_API_KEY` rather than only in a shell export, which a gateway service never sees (the `hermes mcp add` path stores it as `MCP_REMOET_API_KEY` instead):
 
 ```yaml
 mcp_servers:
@@ -49,7 +55,7 @@ mcp_servers:
     auth: oauth
 ```
 
-Reload with `/reload-mcp`, then confirm by asking for a `get_profile` call.
+Reload with `/reload-mcp`, then confirm by asking for a job search. With a key or sign-in, a `get_profile` call confirms the account side.
 
 ## Install on OpenClaw
 
@@ -59,7 +65,14 @@ The same skill is published to ClawHub. Install it owner-qualified:
 openclaw skills install @remoet/remoet
 ```
 
-Then register the server. OAuth is the better default, because `openclaw mcp login` holds the credential and no key goes near your config:
+To search with no key, register the plain route with no header:
+
+```bash
+openclaw mcp set remoet '{"url":"https://api.remoet.dev/mcp","transport":"streamable-http"}'
+openclaw mcp list
+```
+
+For the account tools, OAuth is the better default, because `openclaw mcp login` holds the credential and no key goes near your config:
 
 ```bash
 openclaw mcp set remoet '{"url":"https://api.remoet.dev/mcp/oauth","transport":"streamable-http","auth":"oauth"}'
@@ -92,4 +105,4 @@ Any MCP-capable client (Claude Code, claude.ai, Claude Desktop, Cursor, VS Code,
 
 ## Limits
 
-Remoet is free, and the skill runs against the same numbers as everything else: 50 active stars, 25 unstars per 30 days, 5,000 MCP requests per day. See <Link href="/limits">Limits</Link>.
+Remoet is free, and with an account the skill runs against the same numbers as everything else: 50 active stars, 25 unstars per 30 days, 5,000 MCP requests per day. Without a key, `search_jobs` and `get_listing` run on tighter keyless ceilings: at most 20 results a page, 10 pages deep, and per-minute and per-day limits. See <Link href="/limits">Limits</Link>.

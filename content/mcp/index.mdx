@@ -9,7 +9,7 @@ import Link from 'next/link'
 
 The Remoet MCP server lets your agent search the public tech job catalogue, find companies by the stack they build on, star the ones you would work for, and read and write your profile, saved jobs and link trees. It works with Claude Code, claude.ai, Claude Desktop, Cursor, VS Code, Windsurf, Codex, Hermes, OpenClaw and any other client that speaks the [Model Context Protocol](https://modelcontextprotocol.io).
 
-Remoet is free. You need an account and one API key, or an OAuth connector that mints the key for you.
+Remoet is free. `search_jobs` and `get_listing` work with no account and no key. The other 22 tools need a free account: one API key, or an OAuth connector that mints the key for you.
 
 ## Endpoints
 
@@ -215,11 +215,13 @@ Both install Remoet as a skill that wraps this server, which also teaches the ag
 
 ### Any other client
 
-Point it at `https://api.remoet.dev/mcp` with `Authorization: Bearer <key>`, Streamable HTTP, POST only. A successful `get_profile`, even on an empty profile, means you are connected. If your client can only negotiate OAuth, use `https://api.remoet.dev/mcp/oauth` instead.
+Point it at `https://api.remoet.dev/mcp`, Streamable HTTP, POST only. With no key it connects and `search_jobs` and `get_listing` work, so you can try it before signing up. Add `Authorization: Bearer <key>` for the other tools. A successful `get_profile`, even on an empty profile, means the key works. If your client can only negotiate OAuth, use `https://api.remoet.dev/mcp/oauth` instead.
 
 ## Limits
 
 Every account: 5,000 MCP requests per day, reset at 00:00 UTC, and 120 requests per minute per key on each route. `get_account` and the profile tools, reads and writes both, do not count against the daily number. See <Link href="/limits">Limits</Link> for the rest, including the star cap and the unstar budget.
+
+Without an account, `search_jobs` and `get_listing` run on tighter limits: at most 20 results per page, no page past 10, and per-client ceilings per minute and per day. A free account raises them.
 
 ## Safety
 
