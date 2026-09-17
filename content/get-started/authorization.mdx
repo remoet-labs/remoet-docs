@@ -9,7 +9,9 @@ import Link from 'next/link'
 
 The <Link href="/get-started">Get Started</Link> page covers how to mint an API key. This page covers how to pass it.
 
-If you are connecting claude.ai or Claude Desktop, you authenticate with **OAuth** at `https://api.remoet.dev/mcp/oauth` instead and the connector holds its own key. See <Link href="/mcp">MCP server</Link>. The Bearer header and the 401 bodies below are then not yours to handle, but two things on this page still are: the rate limits, which are counted per account rather than per route, and the 365-day key lifetime, which expires a connector on the same clock and is why one stops working a year after you set it up.
+If you are connecting claude.ai or Claude Desktop, you authenticate with **OAuth** at `https://api.remoet.dev/mcp/oauth` instead and the connector holds its own key. See <Link href="/mcp">MCP server</Link>.
+
+The Bearer header and the 401 bodies below are then not yours to handle. Two other things on this page still are: the rate limits, counted per account rather than per route, and the 365-day key lifetime, which expires a connector on the same clock.
 
 ## Bearer scheme
 
