@@ -36,7 +36,7 @@ hermes mcp add remoet --url https://api.remoet.dev/mcp
 
 Hermes asks whether the server requires authentication. Answer `n` to search with no key, or `y` and paste your key, which Hermes saves to `~/.hermes/.env` and wires into the header. When it asks which tools to enable, a keyless setup only needs `search_jobs` and `get_listing`.
 
-Editing `~/.hermes/config.yaml` by hand works too. Hermes resolves `${VAR}` in `url` and `headers` at connect time, so keep the key in `~/.hermes/.env` rather than only in a shell export, which a gateway service never sees:
+Editing `~/.hermes/config.yaml` by hand works too. Hermes resolves `${VAR}` in `url` and `headers` at connect time, so keep the key in `~/.hermes/.env` as `REMOET_API_KEY` rather than only in a shell export, which a gateway service never sees (the `hermes mcp add` path stores it as `MCP_REMOET_API_KEY` instead):
 
 ```yaml
 mcp_servers:
@@ -105,4 +105,4 @@ Any MCP-capable client (Claude Code, claude.ai, Claude Desktop, Cursor, VS Code,
 
 ## Limits
 
-Remoet is free, and the skill runs against the same numbers as everything else: 50 active stars, 25 unstars per 30 days, 5,000 MCP requests per day. See <Link href="/limits">Limits</Link>.
+Remoet is free, and with an account the skill runs against the same numbers as everything else: 50 active stars, 25 unstars per 30 days, 5,000 MCP requests per day. Without a key, `search_jobs` and `get_listing` run on tighter keyless ceilings: at most 20 results a page, 10 pages deep, and per-minute and per-day limits. See <Link href="/limits">Limits</Link>.
